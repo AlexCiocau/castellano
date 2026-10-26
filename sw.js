@@ -1,5 +1,5 @@
 // Keeps the app itself available offline. The AI model is stored separately by the AI library.
-const CACHE = 'castellano-v1';
+const CACHE = 'castellano-v3';
 const FILES = ['./', './index.html', './webllm.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

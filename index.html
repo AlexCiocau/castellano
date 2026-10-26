@@ -1212,8 +1212,11 @@ document.addEventListener('keydown', e => {
 const MODELS = [
   {id:'gemma3-1b-it-q4f16_1-MLC', name:'Gemma 3 · 1B', mem:'about 0.7 GB of memory', note:'Lightest. Start with this one on the iPhone.'},
   {id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name:'Qwen 2.5 · 1.5B', mem:'about 1.6 GB of memory', note:'Better Spanish. Try it on the iPhone once the light one works.'},
-  {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', name:'Qwen 2.5 · 3B', mem:'about 2.5 GB of memory', note:'The best conversations. Meant for the M1 iPad.'}
+  {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', name:'Qwen 2.5 · 3B', mem:'about 2.5 GB of memory', note:'Good conversations. Meant for the M1 iPad.'},
+  {id:'gemma-4-E2B', variants:['gemma-4-E2B-it-q4f16_1-MLC','gemma-4-E2B-it-q4f32_1-MLC'], name:'Gemma 4 · E2B', mem:'about 3.4–3.9 GB of memory', note:'The newest Gemma and the strongest option here. Most likely too heavy for the iPhone 14 Pro; try it on the M1 iPad.'}
 ];
+// Gemma 4 comes in two builds: a lighter one for graphics chips that support 16-bit maths, and a fallback.
+const realId = key => { const m = MODELS.find(x => x.id===key); if(!m || !m.variants) return key; return AI.f16 === false ? m.variants[1] : m.variants[0]; };
 const SCENARIOS = [
   {id:'free', title:'Charla libre', role:'Lucía, a friendly 30-year-old woman from Madrid', setting:'You have just met the learner at a terrace bar in La Latina. Chat about anything: their trip, food, Madrid, plans.', goal:'Keep the conversation going for ten exchanges.'},
   {id:'t1', title:'Me presento', role:'Lucía, a friendly 30-year-old woman from Madrid', setting:'You meet the learner in the common room of a hostel. Ask who they are, where they are from, why they are learning Spanish.', goal:'Introduce yourself using the text you learned.'},
@@ -1244,11 +1247,11 @@ async function checkEnvironment(){
   AI.gpu = 'checking';
   try {
     if(!navigator.gpu) AI.gpu = 'none';
-    else { const a = await navigator.gpu.requestAdapter(); AI.gpu = a ? 'ok' : 'noadapter'; }
+    else { const a = await navigator.gpu.requestAdapter(); AI.gpu = a ? 'ok' : 'noadapter'; AI.f16 = !!(a && a.features && a.features.has('shader-f16')); }
   } catch(e){ AI.gpu = 'none'; }
   if(location.protocol.startsWith('http')){
     try { AI.webllm = AI.webllm || await import('./webllm.js'); } catch(e){ AI.libError = String(e && e.message || e); }
-    if(AI.webllm){ for(const m of MODELS){ try { AI.cached[m.id] = await AI.webllm.hasModelInCache(m.id); } catch(e){} } }
+    if(AI.webllm){ for(const m of MODELS){ try { AI.cached[m.id] = await AI.webllm.hasModelInCache(realId(m.id)); } catch(e){} } }
   }
   if(current==='talk') render();
 }
@@ -1262,8 +1265,11 @@ async function loadModel(id){
     if(navigator.storage && navigator.storage.persist) { try { await navigator.storage.persist(); } catch(e){} }
     AI.webllm = AI.webllm || await import('./webllm.js');
     const cb = r => { AI.progress = r.progress || 0; AI.progText = r.text || ''; updateProgress(); };
-    if(AI.engine){ AI.engine.setInitProgressCallback(cb); await AI.engine.reload(id); }
-    else AI.engine = await AI.webllm.CreateMLCEngine(id, { initProgressCallback: cb });
+    // Gemma models ship with a 512-token sliding window that clashes with the 4096-token context;
+    // turning the sliding window off (as WebLLM does for Mistral) keeps the whole conversation in view.
+    const chatOpts = { context_window_size: 4096, sliding_window_size: -1 };
+    if(AI.engine){ AI.engine.setInitProgressCallback(cb); await AI.engine.reload(realId(id), chatOpts); }
+    else AI.engine = await AI.webllm.CreateMLCEngine(realId(id), { initProgressCallback: cb }, chatOpts);
     AI.loadedId = id; AI.status = 'ready'; AI.cached[id] = true; AI.showSetup = false;
   } catch(e){
     AI.status = 'error';
@@ -1279,7 +1285,7 @@ function updateProgress(){
 }
 async function deleteModel(id){
   if(!confirm('Delete this downloaded model from the device? You will need wifi to download it again.')) return;
-  try { AI.webllm = AI.webllm || await import('./webllm.js'); await AI.webllm.deleteModelAllInfoInCache(id); AI.cached[id] = false; } catch(e){ alert('Could not delete: ' + (e.message||e)); }
+  try { AI.webllm = AI.webllm || await import('./webllm.js'); await AI.webllm.deleteModelAllInfoInCache(realId(id)); AI.cached[id] = false; } catch(e){ alert('Could not delete: ' + (e.message||e)); }
   render();
 }
 
