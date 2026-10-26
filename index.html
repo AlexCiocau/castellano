@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calle del Castellano + Hablar</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Castellano">
+<meta name="theme-color" content="#1E3FA8">
+<style>
+:root{
+  --bg:#F3F5FA; --surface:#FFFFFF; --ink:#16204A; --muted:#566089;
+  --cobalt:#1E3FA8; --cobalt-soft:#E2E8FA; --ochre:#C98316; --ochre-soft:#FBEFD8;
+  --good:#23704F; --good-soft:#DDF1E7; --bad:#A83232; --bad-soft:#F8E1E1; --line:#D3DAEC;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0C1330; --surface:#141D44; --ink:#E7EBFA; --muted:#9CA6CC;
+    --cobalt:#86A2FF; --cobalt-soft:#1E2A5E; --ochre:#F0B44C; --ochre-soft:#3A2D14;
+    --good:#61CC9C; --good-soft:#163A2C; --bad:#F28B8B; --bad-soft:#41191C; --line:#2B3670;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 64px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* The street-sign plaque: the one bold element */
+.plaque{position:relative;background:var(--surface);border:3px solid var(--cobalt);border-radius:16px;
+  padding:14px 22px 12px;box-shadow:0 0 0 5px var(--surface),0 0 0 7px var(--cobalt);margin:8px 6px 18px;text-align:center}
+.plaque::before,.plaque::after{content:"";position:absolute;top:50%;width:12px;height:12px;background:var(--ochre);transform:translateY(-50%) rotate(45deg)}
+.plaque::before{left:12px}.plaque::after{right:12px}
+.plaque small{display:block;font-family:var(--serif);font-style:italic;color:var(--cobalt);font-size:1.05rem}
+.plaque h1{margin:0;font-family:var(--serif);font-weight:700;color:var(--cobalt);font-size:clamp(2rem,7vw,3rem);letter-spacing:.02em;line-height:1.05}
+.tagline{text-align:center;color:var(--muted);margin:0 0 18px;font-size:.95rem}
+
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:none;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;white-space:nowrap}
+nav button[aria-current="page"]{color:var(--cobalt);border-bottom-color:var(--ochre)}
+
+h2{font-family:var(--serif);font-size:1.6rem;margin:0 0 6px}
+h3{font-size:1.05rem;margin:22px 0 8px}
+p{margin:0 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 14px;font-weight:600}
+.btn:hover{border-color:var(--cobalt)}
+.btn.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--cobalt)}
+.btn.again{border-color:var(--bad);color:var(--bad)}
+.btn.almost{border-color:var(--ochre);color:var(--ochre)}
+.btn.good{border-color:var(--good);color:var(--good)}
+.btn:disabled{opacity:.45;cursor:default}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.9rem}
+.chip[aria-pressed="true"]{background:var(--cobalt-soft);border-color:var(--cobalt);color:var(--cobalt);font-weight:600}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:none;background:var(--surface);padding:8px 12px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--cobalt);color:var(--surface)}
+.kbd{font-size:.75rem;opacity:.7;margin-left:4px}
+
+/* progress */
+.stat{display:grid;grid-template-columns:9rem 1fr 4.5rem;gap:10px;align-items:center;margin:8px 0}
+.bar{height:10px;background:var(--cobalt-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--cobalt);border-radius:99px}
+.stat b{text-align:right;font-variant-numeric:tabular-nums}
+ol.plan{padding-left:1.3rem;margin:0}
+ol.plan li{margin:6px 0}
+
+/* flashcard */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 20px;min-height:230px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:10px}
+.card .cat{font-size:.82rem;color:var(--muted)}
+.card .front{font-family:var(--serif);font-size:clamp(1.5rem,5vw,2.1rem);line-height:1.25}
+.card .back{font-family:var(--serif);font-size:1.35rem;color:var(--cobalt)}
+.card .note{background:var(--ochre-soft);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:.92rem}
+.card input{width:min(100%,420px);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);text-align:center}
+.typed{font-size:.95rem}
+.typed.ok{color:var(--good)} .typed.no{color:var(--bad)}
+.pbar{height:6px;background:var(--cobalt-soft);border-radius:99px;margin:10px 0 14px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--ochre)}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.center{text-align:center}
+.speak{border:none;background:var(--cobalt-soft);color:var(--cobalt);border-radius:999px;width:38px;height:38px;font-size:1.05rem;flex:none}
+.speak.sm{width:30px;height:30px;font-size:.85rem}
+
+/* list */
+table.list{width:100%;border-collapse:collapse;font-size:.95rem}
+table.list td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.list td:first-child{font-family:var(--serif);font-size:1.02rem}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--line);margin-right:6px}
+.dot.l1,.dot.l2{background:var(--ochre)} .dot.l3,.dot.l4,.dot.l5{background:var(--good)}
+
+/* verbs */
+.vq{text-align:center}
+.vq .inf{font-family:var(--serif);font-size:2.2rem;line-height:1.1}
+.vq .gloss{color:var(--muted)}
+.vq .who{font-size:1.25rem;margin-top:10px}
+.vq .who strong{color:var(--cobalt)}
+.tensetag{display:inline-block;background:var(--cobalt-soft);color:var(--cobalt);border-radius:8px;padding:2px 10px;font-weight:600;margin-top:6px}
+.tensetag.spain{background:var(--ochre-soft);color:var(--ochre)}
+.vin{display:block;margin:16px auto 8px;width:min(100%,360px);font-family:var(--serif);font-size:1.5rem;text-align:center;padding:10px;border:2px solid var(--line);border-radius:12px;background:var(--bg)}
+.vin.ok{border-color:var(--good);background:var(--good-soft)} .vin.no{border-color:var(--bad);background:var(--bad-soft)}
+.accents{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.accents button{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);font-family:var(--serif);font-size:1.1rem}
+.fb{min-height:3.2em;margin-top:6px}
+.fb .ok{color:var(--good);font-weight:600} .fb .no{color:var(--bad);font-weight:600} .fb .almost{color:var(--ochre);font-weight:600}
+.fb .ans{font-family:var(--serif);font-size:1.3rem}
+.ctable{width:100%;border-collapse:collapse;font-size:.95rem}
+.ctable th,.ctable td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.ctable td{font-family:var(--serif)}
+.scroll{overflow-x:auto}
+details.tip{background:var(--ochre-soft);border-radius:10px;padding:10px 14px;margin-top:14px}
+details.tip summary{cursor:pointer;font-weight:600}
+
+/* texts */
+.tlist button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.tlist .tt{font-family:var(--serif);font-size:1.15rem;font-weight:700}
+.stars{color:var(--ochre);letter-spacing:2px;white-space:nowrap;font-size:.95rem}
+.stars .off{color:var(--line)}
+.levels{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.levels button{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;font-size:.88rem;font-weight:600;color:var(--muted)}
+.levels button[aria-pressed="true"]{border-color:var(--cobalt);color:var(--cobalt);background:var(--cobalt-soft)}
+.levels button.done::after{content:" ✓";color:var(--good)}
+.line{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.line .body{flex:1}
+.line .who{font-size:.82rem;font-weight:700;color:var(--ochre)}
+.line .es{font-family:var(--serif);font-size:1.22rem;line-height:1.75}
+.line .en{color:var(--muted);font-size:.93rem;margin-top:2px}
+.conn{background:var(--ochre-soft);border-radius:4px;padding:0 2px;box-shadow:inset 0 -2px 0 var(--ochre)}
+.gap{border:none;border-bottom:2px solid var(--cobalt);background:var(--cobalt-soft);color:transparent;border-radius:4px 4px 0 0;
+  font-family:var(--serif);font-size:inherit;padding:0 2px;line-height:1.2;min-width:2ch}
+.gap.hint{color:var(--cobalt)}
+.gap.shown{color:var(--ink);background:transparent;border-bottom-color:var(--good)}
+.gap.conngap{border-bottom-color:var(--ochre);background:var(--ochre-soft)}
+.recite{border:1.5px dashed var(--line);background:transparent;border-radius:8px;padding:6px 10px;color:var(--muted);font-size:.9rem;margin-top:6px}
+.tbtn{border:none;background:none;color:var(--cobalt);font-size:.82rem;font-weight:600;padding:2px 0}
+.personal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.personal input,.fieldi{padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);width:100%}
+label.sm{font-size:.85rem;color:var(--muted)}
+.empty{text-align:center;padding:30px 10px}
+/* conversation */
+.okline{color:var(--good)} .badline{color:var(--bad)} .warnline{color:var(--ochre)}
+.warnpanel{border-color:var(--ochre);background:var(--ochre-soft)}
+.mrow{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.mrow span{flex:1}
+.mrow input{margin-top:5px}
+.chatbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;max-height:55vh;min-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px}
+.msg .txt{font-family:var(--serif);font-size:1.12rem;line-height:1.45;white-space:pre-wrap}
+.msg.ai{align-self:flex-start;background:var(--cobalt-soft);border-bottom-left-radius:4px}
+.msg.me{align-self:flex-end;background:var(--ochre-soft);border-bottom-right-radius:4px}
+.msg.err{background:var(--bad-soft)}
+.msg .corr{margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);font-size:.95rem}
+.msg .en{color:var(--muted);font-size:.92rem;margin-top:6px}
+.composer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px}
+.composer textarea{width:100%;font-family:var(--serif);font-size:1.1rem;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);resize:vertical;margin-bottom:8px}
+.composer .accents{justify-content:flex-start}
+@media (max-width:520px){ .stat{grid-template-columns:6.5rem 1fr 3.8rem} .grades .kbd{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="plaque" aria-label="Calle del Castellano">
+    <small>Calle del</small>
+    <h1>Castellano</h1>
+  </header>
+  <p class="tagline">Offline Spanish practice for Madrid: words, phrases, verbs, texts to learn by heart, and conversations with an on-device AI</p>
+  <nav id="nav" aria-label="Sections"></nav>
+  <main id="view"></main>
+</div>
+<script>
+// ===== CONTENT (Castilian Spanish, Madrid) =====
+// Format for word/phrase lists: "spanish | english | note (optional)"
+const VOCAB_RAW = {
+"Spain vs Latin America": `
+el coche | car | LatAm: carro
+el móvil | mobile phone | LatAm: celular
+el ordenador | computer | LatAm: computadora
+el ordenador portátil | laptop | LatAm: laptop
+conducir | to drive | LatAm: manejar
+coger | to take, to catch (bus, taxi) | Totally normal in Spain
+vale | OK | You will hear it a hundred times a day
+el zumo | juice | LatAm: jugo
+la patata | potato | LatAm: papa
+el piso | flat, apartment; floor | LatAm: departamento
+las gafas | glasses | LatAm: lentes, anteojos
+el billete | ticket (transport); banknote | LatAm: boleto
+la entrada | ticket (museum, concert); entrance |
+el autobús | bus | LatAm: camión, colectivo, micro
+la nevera | fridge | LatAm: refrigerador, heladera
+el melocotón | peach | LatAm: durazno
+la gamba | prawn | LatAm: camarón
+la tarta | cake | LatAm: pastel, torta
+el bocadillo | baguette sandwich | LatAm: sándwich, torta
+el camarero / la camarera | waiter / waitress | LatAm: mesero
+aparcar | to park | LatAm: estacionar
+el aparcamiento | car park | LatAm: estacionamiento
+la chaqueta | jacket | LatAm: chamarra, campera
+la camiseta | T-shirt | LatAm: playera, remera
+el bañador | swimsuit | LatAm: traje de baño
+enfadarse | to get angry | LatAm: enojarse
+la piscina | swimming pool | LatAm: alberca, pileta
+el grifo | tap | LatAm: llave, canilla
+el mechero | lighter | LatAm: encendedor
+vosotros / vosotras | you (plural, informal) | LatAm uses ustedes for everyone
+la acera | pavement | LatAm: banqueta, vereda
+el aseo / el servicio | toilet (in a bar) | el baño also works
+la vuelta | change (money) | LatAm: el cambio, el vuelto
+la caña | small draught beer | Order “una caña” in Madrid
+el tinto de verano | red wine with lemon soda | What locals drink instead of sangría
+echar de menos | to miss (someone) | LatAm: extrañar
+`,
+"Colloquial Madrid": `
+guay | cool, great |
+mola | it’s cool, I like it | ¡Cómo mola!
+tío / tía | mate, dude | ¡Qué pasa, tío!
+majo / maja | nice, friendly | Es muy maja.
+chulo / chula | cool, nice-looking | ¡Qué chulo!
+currar | to work (colloquial) |
+el curro | job (colloquial) |
+flipar | to be amazed | ¡Flipo!
+quedar | to meet up | ¿Quedamos a las ocho?
+ir de cañas | to go out for drinks |
+ir de tapas | to go out for tapas |
+merecer la pena | to be worth it | Very common in Spain
+estar hecho polvo | to be exhausted |
+estar liado / liada | to be busy |
+pasarlo bien | to have a good time | Lo pasamos genial.
+¡Venga! | Come on! / OK then! / Bye! |
+¡Hombre! | Hey! / Of course! | Said to men and women
+¡Qué va! | Not at all! No way! |
+¡Ojo! | Watch out! |
+un montón (de) | loads (of) |
+cutre | tacky, shabby |
+pijo / pija | posh |
+¡Qué morro! | What a nerve! |
+¡Qué rollo! | What a drag! |
+madrugar | to get up early |
+la madrugada | the small hours (1–6 a.m.) |
+la sobremesa | chatting at the table after a meal |
+pillar | to catch, to get (colloquial) | No lo pillo = I don’t get it
+`,
+"Useful verbs & expressions": `
+apetecer | to feel like | ¿Te apetece un café? (works like gustar)
+soler + infinitive | to usually do | Suelo cenar tarde.
+tardar | to take (time) | ¿Cuánto se tarda?
+aprovechar | to make the most of |
+darse cuenta (de) | to realize |
+acabar de + infinitive | to have just done | Acabo de llegar.
+volver a + infinitive | to do again | Vuelve a llamar.
+hacer falta | to be necessary | No hace falta.
+tener ganas de | to look forward to, feel like |
+llevar + time | to have been (doing) for | Llevo dos años aquí.
+quedarse | to stay |
+probar | to try, to taste |
+pasear | to stroll |
+reservar | to book |
+cobrar | to charge |
+devolver | to give back, to refund |
+preocuparse | to worry |
+equivocarse | to make a mistake, be wrong |
+acordarse (de) | to remember |
+olvidarse (de) | to forget |
+perderse | to get lost |
+enterarse (de) | to find out; to catch (what was said) | No me he enterado.
+molestar | to bother |
+importar | to matter; to mind | ¿Te importa…?
+parecer | to seem | Me parece bien.
+encantar | to love (things) | Me encanta Madrid.
+quedar bien / mal | to look good / bad; to fit |
+dar pereza | to not feel like (laziness) | Me da pereza salir.
+echar un vistazo | to take a look |
+echarse a reír | to burst out laughing |
+`,
+"Connectors": `
+pues | well…; so | The most common filler in Spain
+entonces | then, so |
+además | besides, moreover |
+sin embargo | however |
+aunque | although |
+por eso | that’s why |
+o sea | I mean; in other words |
+es que | the thing is | Es que no tengo tiempo.
+la verdad es que | the truth is |
+de hecho | in fact |
+en cambio | on the other hand (contrast) |
+por un lado… por otro | on one hand… on the other |
+al final | in the end |
+de repente | suddenly |
+mientras | while |
+luego | later; then |
+después (de) | after |
+antes (de) | before |
+en cuanto | as soon as |
+ya que | since (reason) |
+como | since, as (at the start) | Como llovía, nos quedamos.
+así que | so (consequence) |
+por lo tanto | therefore |
+a pesar de | despite |
+en realidad | actually |
+por cierto | by the way |
+bueno | well, OK |
+total, que | anyway, long story short |
+resulta que | it turns out that |
+incluso | even |
+tampoco | neither, not either |
+sobre todo | especially, above all |
+es decir | that is to say |
+a lo mejor | maybe | Very common in speech
+igual | maybe (colloquial) | Igual voy mañana.
+por fin | finally (at last) |
+desde entonces | since then |
+en vez de | instead of |
+`,
+"Time & frequency": `
+ahora mismo | right now |
+todavía | still; yet |
+ya | already; now |
+enseguida | right away |
+a menudo | often |
+a veces | sometimes |
+de vez en cuando | from time to time |
+casi nunca | hardly ever |
+pronto | soon; early |
+tarde | late; afternoon |
+anoche | last night |
+anteayer | the day before yesterday |
+pasado mañana | the day after tomorrow |
+el fin de semana | the weekend |
+dentro de una hora | in an hour |
+hace dos días | two days ago |
+desde hace | for (ongoing) | Vivo aquí desde hace un año.
+a partir de | from (starting) |
+al principio | at the beginning |
+el mediodía | midday | Lunch in Spain is around 14:00
+la siesta | nap |
+`,
+"Food & bar": `
+la carta | menu |
+el menú del día | set lunch menu | Great value at lunchtime
+de primero / de segundo / de postre | for starter / main / dessert |
+la ración / media ración | full / half portion |
+el pincho | small bar snack |
+la tapa | tapa | In Madrid often free with a drink
+el aperitivo | pre-lunch drink or snack |
+la tortilla de patatas | Spanish potato omelette |
+las croquetas | croquettes |
+el jamón | cured ham |
+las aceitunas | olives |
+el agua con gas / sin gas | sparkling / still water |
+el vino tinto / blanco | red / white wine |
+el café con leche | coffee with milk |
+el cortado | espresso with a dash of milk |
+el bocadillo de calamares | fried squid sandwich | A Madrid classic
+el cocido madrileño | Madrid chickpea stew |
+picar | to nibble, snack |
+la propina | tip |
+para llevar | to take away |
+el tenedor / el cuchillo / la cuchara | fork / knife / spoon |
+la servilleta | napkin |
+rico / rica | tasty | ¡Qué rico!
+picante | spicy |
+la barra | bar counter |
+casero / casera | homemade |
+`,
+"City & transport": `
+la parada | stop (bus) |
+la estación | station |
+el andén | platform |
+la línea | line |
+el abono | travel pass |
+el trasbordo | change, transfer (metro) |
+la salida | exit; departure |
+la esquina | corner |
+el cruce | crossing |
+el semáforo | traffic light |
+todo recto | straight on |
+girar a la derecha / izquierda | to turn right / left |
+al lado de | next to |
+enfrente de | opposite |
+cerca / lejos | near / far |
+el barrio | neighbourhood |
+la plaza | square |
+la farmacia | pharmacy |
+el estanco | tobacconist |
+el cajero | cash machine |
+la maleta | suitcase |
+el equipaje | luggage |
+el vuelo | flight |
+retrasado | delayed |
+bajarse | to get off |
+subirse | to get on |
+`,
+"Feelings & descriptions": `
+cansado / cansada | tired |
+agobiado / agobiada | overwhelmed, stressed |
+la ilusión | excitement, hope | Tengo mucha ilusión.
+preocupado / preocupada | worried |
+tranquilo / tranquila | calm, quiet |
+ruidoso / ruidosa | noisy |
+caro / barato | expensive / cheap |
+lleno / vacío | full / empty |
+cómodo / incómodo | comfortable / uncomfortable |
+amable | kind |
+gracioso / graciosa | funny |
+raro / rara | weird |
+pesado / pesada | annoying; heavy |
+listo / lista | clever (ser); ready (estar) |
+aburrido / aburrida | boring (ser); bored (estar) |
+harto / harta (de) | fed up (with) |
+precioso / preciosa | beautiful |
+de acuerdo | agreed |
+seguro / segura | sure; safe |
+despierto / despierta | awake |
+`
+};
+
+const PHRASES_RAW = {
+"Bar & tapas": `
+¿Me pones una caña, por favor? | Can I have a small beer, please? | “Ponerme” is how you order in Spain
+Para mí, un café con leche. | For me, a coffee with milk. |
+¿Qué tenéis de tapas? | What tapas do you have? |
+¿Está libre esta mesa? | Is this table free? |
+Ponme otra, porfa. | Give me another one, please. |
+Nada más, gracias. | Nothing else, thanks. |
+¿Me cobras cuando puedas? | Can I pay when you have a moment? | Standard way to ask for the bill at a bar
+¿Se puede pagar con tarjeta? | Can I pay by card? |
+`,
+"Restaurant": `
+¿Tenéis mesa para dos? | Do you have a table for two? |
+He reservado a nombre de… | I’ve booked under the name… |
+¿Qué lleva este plato? | What’s in this dish? |
+¿Qué me recomiendas? | What do you recommend? |
+De primero quiero la ensalada, y de segundo, el pescado. | For the first course I’d like the salad, and for the main, the fish. |
+Soy alérgico a los frutos secos. | I’m allergic to nuts. | alérgica if you’re a woman
+¿Nos traes un poco más de pan? | Could you bring us a bit more bread? |
+¿Me traes la cuenta, por favor? | Could you bring me the bill, please? |
+Estaba todo buenísimo. | Everything was delicious. |
+`,
+"Getting around": `
+Perdona, ¿sabes dónde está el metro? | Excuse me, do you know where the metro is? |
+¿Cómo llego a la Puerta del Sol? | How do I get to Puerta del Sol? |
+¿Está muy lejos de aquí? | Is it far from here? |
+¿Se puede ir andando? | Can you walk there? |
+¿Qué línea tengo que coger? | Which line do I need to take? |
+¿Dónde tengo que hacer trasbordo? | Where do I have to change? |
+¿Este autobús va al centro? | Does this bus go to the centre? |
+¿Cuánto se tarda en llegar? | How long does it take to get there? |
+Me he perdido. | I’m lost. | Spain uses the perfect tense for things that just happened
+Sigue todo recto y gira a la izquierda. | Go straight on and turn left. |
+`,
+"Hotel & flat": `
+Tengo una reserva a nombre de… | I have a booking under the name… |
+¿A qué hora hay que dejar la habitación? | What time is checkout? |
+¿Puedo dejar la maleta aquí? | Can I leave my suitcase here? |
+No funciona el aire acondicionado. | The air conditioning doesn’t work. |
+¿Cuál es la contraseña del wifi? | What’s the wifi password? |
+¿Me podrías ayudar con una cosa? | Could you help me with something? |
+`,
+"Shopping": `
+Solo estoy mirando, gracias. | I’m just looking, thanks. |
+¿Cuánto es? | How much is it? |
+¿Lo tienes en otra talla? | Do you have it in another size? |
+¿Me lo puedo probar? | Can I try it on? |
+Me lo llevo. | I’ll take it. |
+¿Me das una bolsa? | Could I have a bag? |
+`,
+"Small talk": `
+¿De dónde eres? | Where are you from? |
+Soy de…, pero vivo en… | I’m from…, but I live in… | Fill in your own country and city
+Estoy aquí de vacaciones. | I’m here on holiday. |
+Es mi primera vez en Madrid. | It’s my first time in Madrid. |
+Llevo un par de años aprendiendo español. | I’ve been learning Spanish for a couple of years. |
+¿A qué te dedicas? | What do you do for a living? |
+¿Qué me recomiendas ver en Madrid? | What do you recommend I see in Madrid? |
+¡Qué buen tiempo hace hoy! | What lovely weather today! |
+Me encanta esta ciudad. | I love this city. |
+Encantado de conocerte. | Nice to meet you. | Encantada if you’re a woman
+Bueno, me tengo que ir. ¡Hasta luego! | Well, I have to go. See you! |
+`,
+"When you don’t understand": `
+Perdona, no te he entendido. | Sorry, I didn’t understand you. |
+¿Puedes hablar un poco más despacio? | Can you speak a bit more slowly? |
+¿Me lo puedes repetir? | Can you repeat that? |
+¿Qué significa eso? | What does that mean? |
+¿Cómo se dice “luggage” en español? | How do you say “luggage” in Spanish? |
+Lo siento, mi español no es perfecto. | Sorry, my Spanish isn’t perfect. |
+No me he enterado. | I didn’t catch that. |
+¿Quieres decir que está cerrado? | Do you mean it’s closed? |
+`,
+"Opinions & reactions": `
+Me parece bien. | Sounds good to me. |
+Me da igual. | I don’t mind. |
+Creo que sí. / Creo que no. | I think so. / I don’t think so. |
+¡Qué bien! / ¡Qué pena! | Great! / What a shame! |
+¡No me digas! | No way! You don’t say! |
+Tienes razón. | You’re right. |
+No estoy seguro. | I’m not sure. | segura if you’re a woman
+A mí también. / A mí tampoco. | Me too. / Me neither. |
+Depende. | It depends. |
+`,
+"Making plans": `
+¿Quedamos mañana? | Shall we meet tomorrow? |
+¿Te apetece tomar algo? | Do you fancy a drink? |
+¿A qué hora quedamos? | What time shall we meet? |
+Nos vemos en la puerta del museo. | See you at the museum entrance. |
+Voy a llegar un poco tarde. | I’m going to be a bit late. |
+¡Venga, vale! | OK, deal! |
+`,
+"Emergencies": `
+Necesito ayuda. | I need help. |
+¿Dónde está la farmacia más cercana? | Where’s the nearest pharmacy? |
+Me han robado la cartera. | My wallet has been stolen. |
+Me encuentro mal. | I don’t feel well. |
+He perdido el móvil. | I’ve lost my phone. |
+Llama a una ambulancia, por favor. | Call an ambulance, please. |
+`
+};
+
+// ===== VERBS =====
+// Only irregular tenses are listed; everything else is generated by rule.
+const s = x => x.split(' ');
+const VERBS = [
+ {inf:'hablar',en:'to speak'},{inf:'trabajar',en:'to work'},{inf:'llamar',en:'to call'},
+ {inf:'tomar',en:'to take, to have (drink)'},{inf:'esperar',en:'to wait, to hope'},
+ {inf:'quedar',en:'to meet up; to remain'},{inf:'dejar',en:'to leave, to let'},{inf:'llevar',en:'to carry, to wear'},
+ {inf:'comer',en:'to eat'},{inf:'beber',en:'to drink'},{inf:'aprender',en:'to learn'},
+ {inf:'vivir',en:'to live'},
+ {inf:'escribir',en:'to write',part:'escrito'},{inf:'abrir',en:'to open',part:'abierto'},
+ {inf:'creer',en:'to believe',pret:s('creí creíste creyó creímos creísteis creyeron'),part:'creído'},
+ {inf:'llegar',en:'to arrive',pret:s('llegué llegaste llegó llegamos llegasteis llegaron'),subj:s('llegue llegues llegue lleguemos lleguéis lleguen')},
+ {inf:'pagar',en:'to pay',pret:s('pagué pagaste pagó pagamos pagasteis pagaron'),subj:s('pague pagues pague paguemos paguéis paguen')},
+ {inf:'buscar',en:'to look for',pret:s('busqué buscaste buscó buscamos buscasteis buscaron'),subj:s('busque busques busque busquemos busquéis busquen')},
+ {inf:'coger',en:'to take, to catch',pres:s('cojo coges coge cogemos cogéis cogen')},
+ {inf:'ser',en:'to be (identity)',pres:s('soy eres es somos sois son'),pret:s('fui fuiste fue fuimos fuisteis fueron'),imp:s('era eras era éramos erais eran'),subj:s('sea seas sea seamos seáis sean')},
+ {inf:'estar',en:'to be (state, place)',pres:s('estoy estás está estamos estáis están'),pret:s('estuve estuviste estuvo estuvimos estuvisteis estuvieron'),subj:s('esté estés esté estemos estéis estén')},
+ {inf:'ir',en:'to go',pres:s('voy vas va vamos vais van'),pret:s('fui fuiste fue fuimos fuisteis fueron'),imp:s('iba ibas iba íbamos ibais iban'),subj:s('vaya vayas vaya vayamos vayáis vayan')},
+ {inf:'tener',en:'to have',pres:s('tengo tienes tiene tenemos tenéis tienen'),pret:s('tuve tuviste tuvo tuvimos tuvisteis tuvieron'),fut:'tendr'},
+ {inf:'hacer',en:'to do, to make',pres:s('hago haces hace hacemos hacéis hacen'),pret:s('hice hiciste hizo hicimos hicisteis hicieron'),fut:'har',part:'hecho'},
+ {inf:'poder',en:'can, to be able',pres:s('puedo puedes puede podemos podéis pueden'),pret:s('pude pudiste pudo pudimos pudisteis pudieron'),fut:'podr',subj:s('pueda puedas pueda podamos podáis puedan')},
+ {inf:'querer',en:'to want',pres:s('quiero quieres quiere queremos queréis quieren'),pret:s('quise quisiste quiso quisimos quisisteis quisieron'),fut:'querr',subj:s('quiera quieras quiera queramos queráis quieran')},
+ {inf:'decir',en:'to say, to tell',pres:s('digo dices dice decimos decís dicen'),pret:s('dije dijiste dijo dijimos dijisteis dijeron'),fut:'dir',part:'dicho'},
+ {inf:'venir',en:'to come',pres:s('vengo vienes viene venimos venís vienen'),pret:s('vine viniste vino vinimos vinisteis vinieron'),fut:'vendr'},
+ {inf:'poner',en:'to put',pres:s('pongo pones pone ponemos ponéis ponen'),pret:s('puse pusiste puso pusimos pusisteis pusieron'),fut:'pondr',part:'puesto'},
+ {inf:'saber',en:'to know (facts)',pres:s('sé sabes sabe sabemos sabéis saben'),pret:s('supe supiste supo supimos supisteis supieron'),fut:'sabr',subj:s('sepa sepas sepa sepamos sepáis sepan')},
+ {inf:'salir',en:'to go out, to leave',pres:s('salgo sales sale salimos salís salen'),fut:'saldr'},
+ {inf:'dar',en:'to give',pres:s('doy das da damos dais dan'),pret:s('di diste dio dimos disteis dieron'),subj:s('dé des dé demos deis den')},
+ {inf:'ver',en:'to see, to watch',pres:s('veo ves ve vemos veis ven'),pret:s('vi viste vio vimos visteis vieron'),imp:s('veía veías veía veíamos veíais veían'),part:'visto'},
+ {inf:'volver',en:'to come back',pres:s('vuelvo vuelves vuelve volvemos volvéis vuelven'),part:'vuelto',subj:s('vuelva vuelvas vuelva volvamos volváis vuelvan')},
+ {inf:'pedir',en:'to ask for, to order',pres:s('pido pides pide pedimos pedís piden'),pret:s('pedí pediste pidió pedimos pedisteis pidieron'),subj:s('pida pidas pida pidamos pidáis pidan')},
+ {inf:'dormir',en:'to sleep',pres:s('duermo duermes duerme dormimos dormís duermen'),pret:s('dormí dormiste durmió dormimos dormisteis durmieron'),subj:s('duerma duermas duerma durmamos durmáis duerman')},
+ {inf:'pensar',en:'to think',pres:s('pienso piensas piensa pensamos pensáis piensan'),subj:s('piense pienses piense pensemos penséis piensen')},
+ {inf:'empezar',en:'to start',pres:s('empiezo empiezas empieza empezamos empezáis empiezan'),pret:s('empecé empezaste empezó empezamos empezasteis empezaron'),subj:s('empiece empieces empiece empecemos empecéis empiecen')},
+ {inf:'encontrar',en:'to find',pres:s('encuentro encuentras encuentra encontramos encontráis encuentran'),subj:s('encuentre encuentres encuentre encontremos encontréis encuentren')},
+ {inf:'entender',en:'to understand',pres:s('entiendo entiendes entiende entendemos entendéis entienden'),subj:s('entienda entiendas entienda entendamos entendáis entiendan')},
+ {inf:'probar',en:'to try, to taste',pres:s('pruebo pruebas prueba probamos probáis prueban'),subj:s('pruebe pruebes pruebe probemos probéis prueben')},
+ {inf:'jugar',en:'to play',pres:s('juego juegas juega jugamos jugáis juegan'),pret:s('jugué jugaste jugó jugamos jugasteis jugaron'),subj:s('juegue juegues juegue juguemos juguéis jueguen')},
+ {inf:'conocer',en:'to know (people, places)',pres:s('conozco conoces conoce conocemos conocéis conocen')},
+ {inf:'traer',en:'to bring',pres:s('traigo traes trae traemos traéis traen'),pret:s('traje trajiste trajo trajimos trajisteis trajeron'),part:'traído'},
+ {inf:'oír',en:'to hear',pres:s('oigo oyes oye oímos oís oyen'),pret:s('oí oíste oyó oímos oísteis oyeron'),fut:'oir',part:'oído'},
+ {inf:'seguir',en:'to follow, to continue',pres:s('sigo sigues sigue seguimos seguís siguen'),pret:s('seguí seguiste siguió seguimos seguisteis siguieron'),subj:s('siga sigas siga sigamos sigáis sigan')},
+ {inf:'sentir',en:'to feel, to be sorry',pres:s('siento sientes siente sentimos sentís sienten'),pret:s('sentí sentiste sintió sentimos sentisteis sintieron'),subj:s('sienta sientas sienta sintamos sintáis sientan')},
+ {inf:'preferir',en:'to prefer',pres:s('prefiero prefieres prefiere preferimos preferís prefieren'),pret:s('preferí preferiste prefirió preferimos preferisteis prefirieron'),subj:s('prefiera prefieras prefiera prefiramos prefiráis prefieran')}
+];
+
+const PERSONS = ['yo','tú','él / ella / usted','nosotros','vosotros','ellos / ustedes'];
+
+const TENSES = [
+ {id:'pres', name:'Presente', ex:'hablo', when:'Now, habits and general truths. Also near future: “Mañana voy al Prado.”'},
+ {id:'perf', name:'Pretérito perfecto', ex:'he hablado', spain:true, when:'In Spain this is the everyday past for anything that happened today, this morning, this week or “ever”: “Hoy he comido paella.” “¿Has estado en Toledo?” Latin America uses the indefinido here, so this is the biggest tense difference you’ll hear in Madrid.'},
+ {id:'pret', name:'Indefinido', ex:'hablé', when:'Finished past with a finished time: ayer, el año pasado, en 2019. “Ayer fui al Retiro.”'},
+ {id:'imp', name:'Imperfecto', ex:'hablaba', when:'Background, descriptions and past habits: “Hacía calor.” “De pequeño jugaba al fútbol.” Pairs with the indefinido in stories.'},
+ {id:'fut', name:'Futuro', ex:'hablaré', when:'Future, and guessing about the present: “Serán las tres” (it must be about three).'},
+ {id:'cond', name:'Condicional', ex:'hablaría', when:'Would. Also the polite way to ask: “¿Podrías ayudarme?” “Me gustaría…”'},
+ {id:'subj', name:'Subjuntivo presente', ex:'hable', when:'After wishes, feelings and “cuando” about the future: “Espero que te guste.” “Cuando llegues, llámame.” “¡Que lo pases bien!”'}
+];
+
+// ===== TEXTS TO LEARN BY HEART =====
+// Each line: [speaker, spanish, english]. Speaker '' for monologues.
+const TEXTS = [
+{id:'t1', title:'Me presento', en:'Introducing myself', focus:'Your go-to self-introduction. Connectors: así que, la verdad es que, sobre todo, pero, por eso, además.', personal:true, lines:[
+['', 'Hola, ¿qué tal? Me llamo {NOMBRE} y soy de {PAIS}.', 'Hi, how are you? My name is {NOMBRE} and I’m from {PAIS}.'],
+['', 'Es la primera vez que vengo a España, así que tengo muchísima ilusión.', 'It’s the first time I’ve come to Spain, so I’m really excited.'],
+['', 'La verdad es que llevo bastante tiempo aprendiendo español, sobre todo con aplicaciones y vídeos de YouTube.', 'The truth is I’ve been learning Spanish for quite a while, mostly with apps and YouTube videos.'],
+['', 'Entiendo bastante cuando la gente habla despacio, pero cuando habla rápido, me pierdo un poco.', 'I understand quite a lot when people speak slowly, but when they speak fast, I get a bit lost.'],
+['', 'Por eso, si no te importa, háblame un poco más despacio.', 'So, if you don’t mind, speak to me a bit more slowly.'],
+['', 'Además, quiero aprovechar este viaje para practicar todo lo posible.', 'Also, I want to make the most of this trip to practise as much as possible.'],
+['', '¡Así que no te preocupes si me equivoco!', 'So don’t worry if I make mistakes!']
+]},
+{id:'t2', title:'Mi primer día en Madrid', en:'My first day in Madrid', focus:'Pretérito perfecto the Spanish way: everything that happened “today” uses he + participle.', lines:[
+['', 'Hoy ha sido un día increíble.', 'Today has been an incredible day.'],
+['', 'Esta mañana me he levantado temprano y he desayunado churros con chocolate en una cafetería cerca del hotel.', 'This morning I got up early and had churros with chocolate at a café near the hotel.'],
+['', 'Después, he dado un paseo por el centro y he visto la Puerta del Sol y la Plaza Mayor.', 'Afterwards, I went for a walk around the centre and saw Puerta del Sol and Plaza Mayor.'],
+['', 'A mediodía he comido un menú del día que estaba buenísimo y, además, era bastante barato.', 'At midday I had a set lunch that was delicious and, on top of that, quite cheap.'],
+['', 'Por la tarde he ido al Retiro, aunque hacía muchísimo calor.', 'In the afternoon I went to the Retiro, although it was really hot.'],
+['', 'Al final he vuelto al hotel sin energía, pero feliz.', 'In the end I got back to the hotel with no energy left, but happy.'],
+['', 'Mañana quiero visitar el Prado, así que esta noche me voy a acostar pronto.', 'Tomorrow I want to visit the Prado, so tonight I’m going to bed early.']
+]},
+{id:'t3', title:'En el bar', en:'At the bar', focus:'Ordering like a local: ponerme, ¿qué os pongo?, ración, ¿me cobras?', lines:[
+['Camarero', '¡Buenas! ¿Qué os pongo?', 'Hi! What can I get you?'],
+['Tú', 'Hola, buenas. Para mí, una caña, y para mi amiga, un tinto de verano.', 'Hi. A small beer for me, and a tinto de verano for my friend.'],
+['Camarero', 'Muy bien. ¿Queréis algo de comer?', 'Great. Do you want anything to eat?'],
+['Tú', 'Pues sí. ¿Qué nos recomiendas?', 'Well, yes. What do you recommend?'],
+['Camarero', 'La tortilla está muy rica, y las croquetas de jamón son caseras.', 'The tortilla is very good, and the ham croquettes are homemade.'],
+['Tú', 'Vale, entonces ponnos una ración de croquetas y media de tortilla.', 'OK, then give us a portion of croquettes and a half portion of tortilla.'],
+['Camarero', '¡Marchando!', 'Coming right up!'],
+['Tú', 'Perdona, ¿me cobras cuando puedas?', 'Excuse me, can I pay when you have a moment?'],
+['Camarero', 'Claro. Son dieciocho con cincuenta.', 'Sure. That’s eighteen fifty.'],
+['Tú', '¿Puedo pagar con tarjeta?', 'Can I pay by card?'],
+['Camarero', 'Sí, sin problema.', 'Yes, no problem.']
+]},
+{id:'t4', title:'Perdido en Sol', en:'Lost at Sol', focus:'Asking for directions. Connectors: es que, pues, de hecho, entonces.', lines:[
+['Tú', 'Perdona, ¿me puedes ayudar? Es que creo que me he perdido.', 'Excuse me, can you help me? The thing is, I think I’m lost.'],
+['Señora', 'Claro, dime. ¿Adónde vas?', 'Of course, tell me. Where are you going?'],
+['Tú', 'Quiero ir al Palacio Real, pero no sé qué línea tengo que coger.', 'I want to go to the Royal Palace, but I don’t know which line I need to take.'],
+['Señora', 'Pues mira, estamos en Sol. Coge la línea dos, dirección Cuatro Caminos, y bájate en Ópera.', 'Well, look, we’re at Sol. Take line two towards Cuatro Caminos and get off at Ópera.'],
+['Tú', '¿Y está muy lejos?', 'And is it very far?'],
+['Señora', '¡Qué va! Es solo una parada. De hecho, si te apetece andar, se tarda unos diez minutos.', 'Not at all! It’s just one stop. In fact, if you feel like walking, it takes about ten minutes.'],
+['Tú', 'Ah, pues entonces voy andando. ¿Por dónde es?', 'Oh, well then I’ll walk. Which way is it?'],
+['Señora', 'Sigue todo recto por la calle Arenal y enseguida lo verás.', 'Go straight along Calle Arenal and you’ll see it soon.'],
+['Tú', '¡Muchísimas gracias!', 'Thank you so much!'],
+['Señora', 'De nada. ¡Que disfrutes!', 'You’re welcome. Enjoy!']
+]},
+{id:'t5', title:'Mis fines de semana', en:'My weekends', focus:'Talking about habits: soler, normalmente, a veces. Connectors: así que, después de, luego, sobre todo, en cambio, aunque.', lines:[
+['', 'Durante la semana trabajo mucho, así que los fines de semana intento desconectar.', 'During the week I work a lot, so at weekends I try to switch off.'],
+['', 'Los sábados suelo levantarme tarde y, después de desayunar, salgo a correr un rato.', 'On Saturdays I usually get up late and, after breakfast, I go for a run.'],
+['', 'Luego, si hace buen tiempo, quedo con mis amigos para tomar algo en una terraza.', 'Then, if the weather’s nice, I meet my friends for a drink on a terrace.'],
+['', 'Normalmente comemos juntos y la sobremesa dura horas, sobre todo si la conversación es interesante.', 'We usually have lunch together and the chat afterwards lasts hours, especially if the conversation is interesting.'],
+['', 'Los domingos, en cambio, son más tranquilos: leo, veo alguna serie o llamo a mi familia.', 'Sundays, on the other hand, are quieter: I read, watch a series or call my family.'],
+['', 'Aunque a veces me da pereza salir, casi siempre me alegro de haberlo hecho.', 'Although sometimes I can’t be bothered to go out, I’m almost always glad I did.']
+]},
+{id:'t6', title:'¿Ciudad o pueblo?', en:'City or village?', focus:'Giving an opinion. Connectors: por un lado, por otro lado, en cambio, sin embargo, en mi opinión, o sea.', lines:[
+['', 'Mucha gente me pregunta si prefiero vivir en una ciudad grande o en un pueblo.', 'Lots of people ask me if I’d rather live in a big city or in a village.'],
+['', 'Por un lado, la ciudad tiene muchísimas ventajas: hay más trabajo, más cultura y todo está cerca.', 'On one hand, the city has loads of advantages: there are more jobs, more culture and everything is close by.'],
+['', 'Por otro lado, la vida es más cara y, a veces, el ruido y las prisas me agobian.', 'On the other hand, life is more expensive and sometimes the noise and the rush stress me out.'],
+['', 'En un pueblo, en cambio, la vida es más tranquila y todo el mundo se conoce.', 'In a village, by contrast, life is calmer and everyone knows each other.'],
+['', 'Sin embargo, creo que me aburriría un poco después de unos meses.', 'However, I think I’d get a bit bored after a few months.'],
+['', 'En mi opinión, lo ideal sería vivir en una ciudad no demasiado grande y escaparme al campo de vez en cuando.', 'In my opinion, the ideal would be to live in a city that isn’t too big and escape to the countryside from time to time.'],
+['', 'O sea, ¡quiero lo mejor de los dos mundos!', 'In other words, I want the best of both worlds!']
+]},
+{id:'t7', title:'Un problema en el piso', en:'A problem with the flat', focus:'A polite message to a host (usted form). Resulta que, sigue sin funcionar, ¿podría…?', lines:[
+['', 'Hola, buenas tardes. Le escribo porque hemos tenido un pequeño problema con el piso.', 'Hello, good afternoon. I’m writing because we’ve had a small problem with the flat.'],
+['', 'Resulta que esta mañana el agua caliente ha dejado de funcionar y no hemos podido ducharnos.', 'It turns out that this morning the hot water stopped working and we couldn’t shower.'],
+['', 'Hemos intentado reiniciar el calentador, como dice el manual, pero sigue sin funcionar.', 'We tried restarting the water heater, as the manual says, but it still doesn’t work.'],
+['', '¿Podría venir alguien a echarle un vistazo hoy?', 'Could someone come and take a look at it today?'],
+['', 'Estaremos fuera hasta las seis, pero después estaremos en casa toda la tarde.', 'We’ll be out until six, but after that we’ll be in all evening.'],
+['', 'Muchas gracias de antemano y perdone las molestias.', 'Thank you very much in advance, and sorry for the trouble.'],
+['', 'Un saludo.', 'Best regards.']
+]},
+{id:'t8', title:'El caballo con leche', en:'The horse with milk', focus:'Telling a story: imperfecto for the background, indefinido for what happened. Connectors: como, por fin, de repente, luego, total, que, al final, desde entonces.', lines:[
+['', 'El verano pasado me pasó una cosa muy graciosa.', 'Last summer something really funny happened to me.'],
+['', 'Estaba en una cafetería de Madrid y quería pedir un café con leche.', 'I was in a café in Madrid and wanted to order a coffee with milk.'],
+['', 'Como tenía un poco de miedo de equivocarme, repetí la frase varias veces en mi cabeza.', 'Since I was a bit afraid of making a mistake, I repeated the sentence several times in my head.'],
+['', 'Por fin llegó mi turno y, de repente, en vez de un café, pedí un caballo con leche.', 'Finally my turn came and, suddenly, instead of a coffee, I ordered a horse with milk.'],
+['', 'El camarero me miró muy serio durante un segundo y luego se echó a reír.', 'The waiter looked at me very seriously for a second and then burst out laughing.'],
+['', 'Total, que al final me trajo el café y me dijo: «Hoy no nos quedan caballos, lo siento».', 'Long story short, in the end he brought me the coffee and said: “We’re out of horses today, sorry.”'],
+['', 'Desde entonces, cada vez que pido un café, me acuerdo de aquel día.', 'Since then, every time I order a coffee, I remember that day.']
+]},
+{id:'t9', title:'Planes para mañana', en:'Plans for tomorrow', focus:'Making plans: ir a, quedar, ¿te apetece…? Connectors: pues, como, igual, pero, además, así que.', lines:[
+['Lucía', 'Oye, ¿qué vas a hacer mañana?', 'Hey, what are you going to do tomorrow?'],
+['Tú', 'Pues todavía no lo sé. Como es domingo, igual voy al Rastro por la mañana.', 'Well, I don’t know yet. Since it’s Sunday, maybe I’ll go to the Rastro in the morning.'],
+['Lucía', '¡Buena idea! Pero ve pronto, porque a partir de las once hay muchísima gente.', 'Good idea! But go early, because from eleven it gets really crowded.'],
+['Tú', 'Vale, gracias por el consejo. ¿Y tú? ¿Tienes planes?', 'OK, thanks for the tip. And you? Do you have plans?'],
+['Lucía', 'He quedado con unos amigos para comer en La Latina. ¿Te apetece venir?', 'I’m meeting some friends for lunch in La Latina. Do you fancy coming?'],
+['Tú', '¡Me encantaría! ¿A qué hora habéis quedado?', 'I’d love to! What time are you meeting?'],
+['Lucía', 'A las dos y media, en la Plaza de la Paja.', 'At half past two, in Plaza de la Paja.'],
+['Tú', 'Perfecto. Además, el Rastro está al lado, así que me viene genial.', 'Perfect. Plus, the Rastro is right next to it, so that works great for me.'],
+['Lucía', '¡Genial! Pues nos vemos allí.', 'Great! See you there, then.']
+]}
+];
+
+const CONNECTOR_PHRASES = ['la verdad es que','por un lado','por otro lado','sin embargo','sobre todo','por eso','así que','además','aunque','o sea','es que','de hecho','en cambio','al final','de repente','mientras','luego','después de','después','antes de','en cuanto','ya que','como','por lo tanto','a pesar de','en realidad','por cierto','total, que','resulta que','incluso','tampoco','pues','entonces','igual','por fin','desde entonces','en vez de','en mi opinión','normalmente','a veces','pero','porque','si'];
+
+// ===== UTILITIES =====
+const $ = (sel, el=document) => el.querySelector(sel);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const strip = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const norm = t => t.toLowerCase().replace(/[¡!¿?.,;:«»“”"()…]/g,' ').replace(/\s+/g,' ').trim();
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const hash = str => { let h=2166136261; for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);} return (h>>>0)/4294967295; };
+
+// ===== STORAGE (saved in this browser, works offline) =====
+const KEY = 'calle-castellano-v1';
+let P;
+try { P = JSON.parse(localStorage.getItem(KEY)) || null; } catch(e){ P = null; }
+if(!P) P = {cards:{}, verbs:{}, texts:{}, settings:{}};
+['cards','verbs','texts','settings'].forEach(k => { if(!P[k]) P[k] = {}; });
+let saveTimer;
+const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch(e){} }, 150); };
+
+// ===== CONTENT PARSING =====
+function parseRaw(raw, type){
+  const cats = {};
+  for(const [cat, block] of Object.entries(raw)){
+    cats[cat] = block.trim().split('\n').filter(Boolean).map(l => {
+      const [es, en, note] = l.split('|').map(x => (x||'').trim());
+      return {id:type+':'+es, es, en, note, cat};
+    });
+  }
+  return cats;
+}
+const DECKS = { words: parseRaw(VOCAB_RAW,'w'), phrases: parseRaw(PHRASES_RAW,'p') };
+
+// ===== SPEECH (uses voices installed on your device, so it can work offline) =====
+let esVoice = null;
+function pickVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  const es = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+  esVoice = es.find(v => v.lang.replace('_','-').toLowerCase()==='es-es' && v.localService)
+         || es.find(v => v.lang.replace('_','-').toLowerCase()==='es-es')
+         || es.find(v => v.localService) || es[0] || null;
+  if(current==='home') render();
+}
+function speak(text, rate){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const clean = fill(text).replace(/\[[^\]]*\]/g,'').replace(/[«»]/g,'');
+  const u = new SpeechSynthesisUtterance(clean);
+  u.lang = 'es-ES'; if(esVoice) u.voice = esVoice;
+  u.rate = rate || P.settings.rate || 0.9;
+  speechSynthesis.speak(u);
+}
+const speakBtn = (text, cls='') => `<button class="speak ${cls}" data-say="${esc(text)}" aria-label="Listen" title="Listen">🔊</button>`;
+
+function fill(t){
+  return t.replace('{NOMBRE}', P.settings.name || '[tu nombre]').replace('{PAIS}', P.settings.country || '[tu país]');
+}
+
+// ===== NAVIGATION =====
+const VIEWS = [['home','Inicio'],['words','Palabras'],['phrases','Frases'],['verbs','Verbos'],['texts','Textos'],['talk','Hablar']];
+let current = 'home';
+function go(v){ current = v; if('speechSynthesis' in window) speechSynthesis.cancel(); render(); window.scrollTo(0,0); }
+function renderNav(){
+  $('#nav').innerHTML = VIEWS.map(([id,label]) => `<button data-go="${id}" ${current===id?'aria-current="page"':''}>${label}</button>`).join('');
+}
+function render(){
+  renderNav();
+  const v = $('#view');
+  if(current==='home') v.innerHTML = homeView();
+  if(current==='words' || current==='phrases') v.innerHTML = deckView(current);
+  if(current==='verbs') v.innerHTML = verbView();
+  if(current==='texts') v.innerHTML = textView();
+  if(current==='talk'){ v.innerHTML = talkView(); scrollChat(); }
+  const f = $('[data-autofocus]'); if(f) f.focus({preventScroll:true});
+}
+
+// ===== SPACED REPETITION =====
+const INTERVAL = [0, 4*60e3, 25*60e3, 20*3600e3, 3*86400e3, 7*86400e3]; // box 0..5
+const cardKey = (c, dir) => c.id + '|' + dir;
+const box = (c, dir) => (P.cards[cardKey(c,dir)]||{}).b || 0;
+function knownCount(deck){
+  let k=0, n=0;
+  for(const list of Object.values(DECKS[deck])) for(const c of list){ n++; if(Math.max(box(c,'es'),box(c,'en'))>=3) k++; }
+  return [k,n];
+}
+
+// ===== HOME =====
+function homeView(){
+  const [wk,wn] = knownCount('words'), [pk,pn] = knownCount('phrases');
+  let vc=0, vn=0; Object.values(P.verbs).forEach(s => { vc+=s.c; vn+=s.n; });
+  const tm = TEXTS.filter(t => (P.texts[t.id]||0) >= 5).length;
+  const bar = (label, a, b, txt) => `<div class="stat"><span>${label}</span><div class="bar"><i style="width:${b?Math.round(a/b*100):0}%"></i></div><b>${txt}</b></div>`;
+  const voiceOk = !!esVoice;
+  const voiceName = esVoice ? `${esc(esVoice.name)} (${esc(esVoice.lang)})` : '';
+  return `
+  <h2>¡Buen viaje!</h2>
+  <p>This follows the order that worked for you with English: build a base of words, put them into phrases and verb forms, then learn short texts by heart so the connectors and turns of phrase stick. Everything here is Castilian Spanish as spoken in Madrid, including <em>vosotros</em> and the Spanish use of the perfect tense.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">A one-hour loop for the flight</h3>
+    <ol class="plan">
+      <li><b>Palabras, 15 min.</b> One round of 20 cards. Start Spanish → English, then switch to English → Spanish once a category feels easy.</li>
+      <li><b>Verbos, 10 min.</b> Drill the presente, perfecto and indefinido first. Add the other tenses when you’re hitting most of them.</li>
+      <li><b>Frases, 10 min.</b> Say each phrase out loud (or in your head) before you flip the card.</li>
+      <li><b>Textos, 10 min.</b> Take one text up one level. Read it, then hide the connectors, then more and more words, until you can recite it from the English.</li>
+      <li><b>Hablar, 10 min.</b> Role-play the situation of the text you just practised with the AI, so the phrases come out in a real conversation. Save its corrections as cards.</li>
+    </ol>
+    <p class="small muted" style="margin:10px 0 0">Repeat the loop with the next text. Cards you miss come back sooner; cards you know come back later.</p>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Your progress</h3>
+    ${bar('Words known', wk, wn, `${wk}/${wn}`)}
+    ${bar('Phrases known', pk, pn, `${pk}/${pn}`)}
+    ${bar('Verb accuracy', vc, vn, vn?Math.round(vc/vn*100)+'%':'–')}
+    ${bar('Texts by heart', tm, TEXTS.length, `${tm}/${TEXTS.length}`)}
+    <p class="small muted" style="margin:8px 0 0">A card counts as known after you get it right three times, spread over time. Progress is saved in this browser on this device.</p>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Listening</h3>
+    ${'speechSynthesis' in window ? (voiceOk
+      ? `<p>Spanish voice found: ${voiceName}. ${/es-?es/i.test(esVoice.lang.replace('_','-'))?'':'It isn’t a Spain voice, so the accent will differ a bit.'}</p>`
+      : `<p>No Spanish voice found on this device yet. Everything else works; to hear audio, install a Spanish (Spain) voice in your system’s speech or text-to-speech settings, then reload this page.</p>`)
+      : `<p>This browser can’t read text aloud. Everything else works.</p>`}
+    <div class="row">
+      <button class="btn" data-say="Hola, ¿qué tal? ¿Me pones una caña, por favor?">🔊 Test voice</button>
+      <label class="small muted" for="rate">Speed</label>
+      <input id="rate" type="range" min="0.6" max="1.1" step="0.05" value="${P.settings.rate||0.9}" style="width:140px">
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Before you board</h3>
+    <p class="small">Turn on airplane mode and reload this file to check that it opens and the voice still speaks; some voices need the internet. Keep using the same browser on the same device, since that’s where your progress is saved.</p>
+    <div class="row"><button class="btn ghost" data-act="reset">Reset all progress</button></div>
+  </div>`;
+}
+
+// ===== FLASHCARDS (words + phrases) =====
+const deckState = { words:null, phrases:null };
+function deckSettings(deck){
+  const k = 'deck_'+deck;
+  if(!P.settings[k]) P.settings[k] = { cats: Object.keys(DECKS[deck]), dir:'es', size:20, mode:'study' };
+  return P.settings[k];
+}
+function buildSession(deck){
+  const st = deckSettings(deck), now = Date.now();
+  const pool = st.cats.flatMap(c => DECKS[deck][c] || []);
+  const dir = st.dir;
+  const rec = c => P.cards[cardKey(c,dir)];
+  const due = pool.filter(c => rec(c) && rec(c).due <= now).sort((a,b) => rec(a).due - rec(b).due);
+  const fresh = pool.filter(c => !rec(c));
+  let q = [...shuffle(due).slice(0, st.size)];
+  if(q.length < st.size) q = q.concat(fresh.slice(0, st.size - q.length));
+  if(q.length < st.size){
+    const later = pool.filter(c => rec(c) && rec(c).due > now).sort((a,b) => rec(a).due - rec(b).due);
+    q = q.concat(later.slice(0, st.size - q.length));
+  }
+  q = shuffle(q);
+  deckState[deck] = { q, total:q.length, done:0, flipped:false, typed:'', stats:{again:0,almost:0,good:0}, dir };
+}
+function deckView(deck){
+  const st = deckSettings(deck);
+  const title = deck==='words' ? 'Palabras' : 'Frases';
+  const cats = Object.keys(DECKS[deck]);
+  const head = `
+    <h2>${title}</h2>
+    <p class="muted">${deck==='words' ? 'High-frequency words, Spain-specific vocabulary and the connectors that hold sentences together.' : 'Ready-made sentences for the situations you’ll actually be in.'}</p>
+    <div class="row" style="margin:12px 0">
+      <div class="seg" role="group" aria-label="Mode">
+        <button data-deckmode="study" aria-pressed="${st.mode==='study'}">Study</button>
+        <button data-deckmode="list" aria-pressed="${st.mode==='list'}">Browse all</button>
+      </div>
+      ${st.mode==='study' ? `<div class="seg" role="group" aria-label="Direction">
+        <button data-dir="es" aria-pressed="${st.dir==='es'}">Español → English</button>
+        <button data-dir="en" aria-pressed="${st.dir==='en'}">English → Español</button>
+      </div>` : ''}
+    </div>
+    <div class="row" style="margin-bottom:16px">
+      ${cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${st.cats.includes(c)}">${esc(c)} <span class="muted small">${DECKS[deck][c].length}</span></button>`).join('')}
+    </div>`;
+  if(st.mode==='list') return head + listView(deck);
+  if(!st.cats.length) return head + `<div class="panel empty">Pick at least one category above to start a round.</div>`;
+  let S = deckState[deck];
+  if(!S || S.dir !== st.dir) { buildSession(deck); S = deckState[deck]; }
+  if(!S.q.length) return head + finishView(deck, S);
+  const c = S.q[0];
+  const front = st.dir==='es' ? c.es : c.en;
+  const back = st.dir==='es' ? c.en : c.es;
+  let typedHtml = '';
+  if(S.flipped && st.dir==='en' && S.typed){
+    const ok = strip(norm(S.typed)) === strip(norm(c.es)) || c.es.split('/').some(p => strip(norm(p)) === strip(norm(S.typed)));
+    typedHtml = `<div class="typed ${ok?'ok':'no'}">You wrote: ${esc(S.typed)} ${ok?'✓':''}</div>`;
+  }
+  return head + `
+    <div class="row small muted" style="justify-content:space-between"><span>Card ${S.done+1} of ${S.total}</span><span>${S.q.length} left in this round</span></div>
+    <div class="pbar"><i style="width:${Math.round(S.done/S.total*100)}%"></i></div>
+    <div class="card">
+      <div class="cat">${esc(c.cat)}</div>
+      <div class="row" style="justify-content:center">
+        <div class="front">${esc(front)}</div>
+        ${st.dir==='es' ? speakBtn(c.es) : ''}
+      </div>
+      ${!S.flipped && st.dir==='en' ? `<input id="typein" placeholder="Type it in Spanish (optional), then Enter" autocomplete="off" autocapitalize="off" spellcheck="false" data-autofocus>` : ''}
+      ${S.flipped ? `<div class="row" style="justify-content:center"><div class="back">${esc(back)}</div>${st.dir==='en' ? speakBtn(c.es) : ''}</div>${typedHtml}${c.note?`<div class="note">${esc(c.note)}</div>`:''}` : ''}
+    </div>
+    ${S.flipped ? `<div class="grades">
+        <button class="btn again" data-grade="again">Didn’t know<span class="kbd">1</span></button>
+        <button class="btn almost" data-grade="almost">Almost<span class="kbd">2</span></button>
+        <button class="btn good" data-grade="good">Knew it<span class="kbd">3</span></button>
+      </div>` : `<div class="center" style="margin-top:14px"><button class="btn primary" data-act="flip" ${st.dir==='es'?'data-autofocus':''}>Show answer <span class="kbd">Space</span></button></div>`}
+    ${st.dir==='en' && !S.flipped ? '' : ''}
+    ${accentBar(st.dir==='en' && !S.flipped)}`;
+}
+function accentBar(show){
+  if(!show) return '';
+  return `<div class="accents" style="margin-top:12px">${['á','é','í','ó','ú','ñ','ü','¿','¡'].map(ch => `<button data-ins="${ch}" tabindex="-1">${ch}</button>`).join('')}</div>`;
+}
+function grade(deck, g){
+  const S = deckState[deck], st = deckSettings(deck), c = S.q.shift(), k = cardKey(c, st.dir), now = Date.now();
+  const r = P.cards[k] || {b:0, due:0};
+  S.stats[g]++;
+  if(g==='again'){ r.b = 1; r.due = now + INTERVAL[1]; S.q.splice(Math.min(3, S.q.length), 0, c); }
+  else if(g==='almost'){ r.b = Math.max(1, r.b); r.due = now + INTERVAL[r.b]; S.q.splice(Math.min(7, S.q.length), 0, c); }
+  else { r.b = Math.min(5, r.b+1); r.due = now + INTERVAL[r.b]; S.done++; }
+  P.cards[k] = r; save();
+  S.flipped = false; S.typed = '';
+  render();
+}
+function finishView(deck, S){
+  const [k,n] = knownCount(deck);
+  return `<div class="panel empty">
+    <h2>¡Muy bien!</h2>
+    <p>${S.total ? `Round done: ${S.total} cards. You marked ${S.stats.good} as known on the way through.` : 'No cards in these categories yet.'}</p>
+    <p class="muted">${k} of ${n} ${deck==='words'?'words':'phrases'} known overall.</p>
+    <button class="btn primary" data-act="newround" data-autofocus>Start another round</button>
+  </div>`;
+}
+function listView(deck){
+  const st = deckSettings(deck);
+  return st.cats.map(cat => `
+    <h3>${esc(cat)}</h3>
+    <div class="panel" style="padding:6px 12px"><table class="list">${DECKS[deck][cat].map(c => {
+      const b = Math.max(box(c,'es'), box(c,'en'));
+      return `<tr><td><span class="dot l${b}"></span>${esc(c.es)}</td><td>${esc(c.en)}${c.note?`<div class="small muted">${esc(c.note)}</div>`:''}</td><td style="width:40px">${speakBtn(c.es,'sm')}</td></tr>`;
+    }).join('')}</table></div>`).join('') + `<p class="small muted">Dots: grey new, yellow learning, green known.</p>`;
+}
+
+// ===== VERBS =====
+const ENDINGS = {
+  pres:{ar:['o','as','a','amos','áis','an'], er:['o','es','e','emos','éis','en'], ir:['o','es','e','imos','ís','en']},
+  pret:{ar:['é','aste','ó','amos','asteis','aron'], er:['í','iste','ió','imos','isteis','ieron'], ir:['í','iste','ió','imos','isteis','ieron']},
+  imp:{ar:['aba','abas','aba','ábamos','abais','aban'], er:['ía','ías','ía','íamos','íais','ían'], ir:['ía','ías','ía','íamos','íais','ían']}
+};
+function conjugate(v, t){
+  const inf = v.inf, type = strip(inf.slice(-2)), stem = inf.slice(0,-2);
+  if(t==='pres') return v.pres || ENDINGS.pres[type].map(e => stem+e);
+  if(t==='pret') return v.pret || ENDINGS.pret[type].map(e => stem+e);
+  if(t==='imp') return v.imp || ENDINGS.imp[type].map(e => stem+e);
+  const fs = v.fut || strip(inf);
+  if(t==='fut') return ['é','ás','á','emos','éis','án'].map(e => fs+e);
+  if(t==='cond') return ['ía','ías','ía','íamos','íais','ían'].map(e => fs+e);
+  if(t==='perf'){ const part = v.part || stem + (type==='ar'?'ado':'ido'); return ['he','has','ha','hemos','habéis','han'].map(h => h+' '+part); }
+  if(t==='subj'){
+    if(v.subj) return v.subj;
+    const base = conjugate(v,'pres')[0].slice(0,-1);
+    return (type==='ar'?['e','es','e','emos','éis','en']:['a','as','a','amos','áis','an']).map(e => base+e);
+  }
+}
+const isIrregular = v => ['pres','pret','imp','fut','part','subj'].some(k => v[k]);
+const VS = { q:null, answered:false, result:null, retry:[], count:0, streak:0, tableVerb:'ser' };
+function verbSettings(){
+  if(!P.settings.verbs) P.settings.verbs = { tenses:['pres','perf','pret'], set:'all', mode:'drill' };
+  return P.settings.verbs;
+}
+function nextVerbQ(){
+  const st = verbSettings();
+  VS.count++;
+  const retryReady = VS.retry.find(r => VS.count - r.at >= 3);
+  if(retryReady){ VS.retry = VS.retry.filter(r => r !== retryReady); VS.q = retryReady.q; }
+  else {
+    const verbs = VERBS.filter(v => st.set==='all' || (st.set==='irr' ? isIrregular(v) : !isIrregular(v)));
+    const v = verbs[Math.floor(Math.random()*verbs.length)];
+    const t = st.tenses[Math.floor(Math.random()*st.tenses.length)];
+    const p = Math.floor(Math.random()*6);
+    VS.q = {v, t, p};
+  }
+  VS.answered = false; VS.result = null;
+}
+function verbView(){
+  const st = verbSettings();
+  const head = `<h2>Verbos</h2>
+    <p class="muted">${VERBS.length} of the most useful verbs, with <em>vosotros</em> included the way it’s used in Spain.</p>
+    <div class="row" style="margin:12px 0">
+      <div class="seg" role="group" aria-label="Mode">
+        <button data-vmode="drill" aria-pressed="${st.mode==='drill'}">Drill</button>
+        <button data-vmode="tables" aria-pressed="${st.mode==='tables'}">Tables</button>
+        <button data-vmode="guide" aria-pressed="${st.mode==='guide'}">When to use each tense</button>
+      </div>
+    </div>`;
+  if(st.mode==='tables') return head + tablesView();
+  if(st.mode==='guide') return head + guideView();
+  const tenseChips = TENSES.map(t => `<button class="chip" data-tense="${t.id}" aria-pressed="${st.tenses.includes(t.id)}">${t.name}</button>`).join('');
+  const setSeg = `<div class="seg" role="group" aria-label="Verb set">
+      <button data-vset="all" aria-pressed="${st.set==='all'}">All verbs</button>
+      <button data-vset="irr" aria-pressed="${st.set==='irr'}">Irregular</button>
+      <button data-vset="reg" aria-pressed="${st.set==='reg'}">Regular</button></div>`;
+  if(!st.tenses.length) return head + `<div class="row" style="margin-bottom:10px">${tenseChips}</div><div class="panel empty">Pick at least one tense to start drilling.</div>`;
+  if(!VS.q || !st.tenses.includes(VS.q.t)) nextVerbQ();
+  const {v,t,p} = VS.q, T = TENSES.find(x => x.id===t);
+  const answer = conjugate(v,t)[p];
+  let fb = '';
+  if(VS.answered){
+    if(VS.result==='ok') fb = `<div class="ok">¡Correcto!</div>`;
+    else if(VS.result==='accent') fb = `<div class="almost">Right verb, check the accents:</div><div class="ans">${esc(answer)}</div>`;
+    else fb = `<div class="no">The answer is:</div><div class="ans">${esc(answer)}</div>`;
+  }
+  const stats = P.verbs[t];
+  return head + `
+    <div class="row" style="margin-bottom:8px">${tenseChips}</div>
+    <div class="row" style="margin-bottom:16px">${setSeg}</div>
+    <div class="panel vq">
+      <div class="small muted">Streak: ${VS.streak}${stats?` · ${T.name}: ${Math.round(stats.c/stats.n*100)}% of ${stats.n}`:''}</div>
+      <div class="inf" style="margin-top:8px">${esc(v.inf)}</div>
+      <div class="gloss">${esc(v.en)}</div>
+      <div class="tensetag ${T.spain?'spain':''}">${T.name}</div>
+      <div class="who"><strong>${PERSONS[p]}</strong> …</div>
+      <input id="vin" class="vin ${VS.answered ? (VS.result==='no'?'no':'ok') : ''}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" value="${VS.answered?esc(VS.last||''):''}" ${VS.answered?'readonly':''} data-autofocus>
+      ${accentBar(!VS.answered)}
+      <div class="fb">${fb}</div>
+      <div class="row" style="justify-content:center;margin-top:8px">
+        ${VS.answered ? `<button class="btn primary" data-act="vnext">Next <span class="kbd">Enter</span></button>${speakBtn(answer)}` : `<button class="btn primary" data-act="vcheck">Check <span class="kbd">Enter</span></button><button class="btn ghost" data-act="vskip">Show answer</button>`}
+      </div>
+      <details class="tip" style="text-align:left"><summary>When do I use the ${T.name.toLowerCase()}?</summary><p style="margin:8px 0 0">${esc(T.when)}</p></details>
+    </div>`;
+}
+function checkVerb(giveUp){
+  const {v,t,p} = VS.q, answer = conjugate(v,t)[p];
+  const input = giveUp ? '' : ($('#vin').value || '');
+  if(!giveUp && !input.trim()) return;
+  VS.last = input;
+  const a = norm(input).replace(/^(yo|tú|tu|él|el|ella|usted|nosotros|nosotras|vosotros|vosotras|ellos|ellas|ustedes)\s+/,'');
+  const target = norm(answer);
+  VS.result = a===target ? 'ok' : (strip(a)===strip(target) ? 'accent' : 'no');
+  VS.answered = true;
+  const s = P.verbs[t] || {c:0,n:0}; s.n++; if(VS.result!=='no') s.c++; P.verbs[t] = s; save();
+  if(VS.result==='no'){ VS.streak = 0; VS.retry.push({q:VS.q, at:VS.count}); } else VS.streak++;
+  render();
+}
+function tablesView(){
+  const v = VERBS.find(x => x.inf===VS.tableVerb) || VERBS[0];
+  return `<div class="row" style="margin-bottom:12px">
+      <label for="vpick" class="small muted">Verb</label>
+      <select id="vpick" class="fieldi" style="width:auto">${[...VERBS].sort((a,b)=>a.inf.localeCompare(b.inf,'es')).map(x => `<option value="${x.inf}" ${x.inf===v.inf?'selected':''}>${x.inf}, ${esc(x.en)}${isIrregular(x)?' *':''}</option>`).join('')}</select>
+    </div>
+    <p class="small muted">* has irregular forms. Tap 🔊 to hear a whole tense.</p>
+    ${TENSES.map(T => { const f = conjugate(v,T.id); return `
+      <div class="panel" style="padding:10px 14px">
+        <div class="row" style="justify-content:space-between"><b>${T.name}</b>${speakBtn(f.join(', '),'sm')}</div>
+        <div class="scroll"><table class="ctable">${PERSONS.map((pp,i) => `<tr><th class="small muted" style="width:45%">${pp}</th><td>${esc(f[i])}</td></tr>`).join('')}</table></div>
+      </div>`; }).join('')}`;
+}
+function guideView(){
+  return TENSES.map(T => `<div class="panel">
+      <div class="row" style="justify-content:space-between"><b>${T.name}</b><span class="tensetag ${T.spain?'spain':''}" style="margin:0">hablar → ${T.ex}</span></div>
+      <p style="margin:8px 0 0">${esc(T.when)}</p></div>`).join('');
+}
+
+// ===== TEXTS =====
+const LEVELS = ['Read','Connectors hidden','30% hidden','60% hidden','First letters','Recite'];
+const TS = { open:null, level:0, seed:0, showEn:{}, revealed:{} };
+const connRe = new RegExp('(?<!\\p{L})(' + [...CONNECTOR_PHRASES].sort((a,b)=>b.length-a.length).map(x => x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')(?!\\p{L})', 'giu');
+function tokenize(sentence){
+  const ranges = []; let m; connRe.lastIndex = 0;
+  while((m = connRe.exec(sentence))) ranges.push([m.index, m.index + m[0].length]);
+  const out = []; const re = /\p{L}+|[^\p{L}]+/gu; let t;
+  while((t = re.exec(sentence))){
+    const isW = /\p{L}/u.test(t[0]);
+    out.push({t:t[0], w:isW, conn: isW && ranges.some(([a,b]) => t.index >= a && t.index < b)});
+  }
+  return out;
+}
+function renderSentence(textId, li, es, level){
+  const toks = tokenize(fill(es));
+  let wi = 0;
+  return toks.map(tok => {
+    if(!tok.w) return esc(tok.t);
+    const key = `${textId}-${li}-${wi}`; const idx = wi++;
+    if(level===0) return tok.conn ? `<span class="conn">${esc(tok.t)}</span>` : esc(tok.t);
+    const ratio = level===2 ? .3 : level===3 ? .6 : 0;
+    const hide = level===4 || tok.conn || (ratio && tok.t.length>1 && hash(key+':'+TS.seed) < ratio);
+    if(!hide) return esc(tok.t);
+    const shown = TS.revealed[key];
+    const width = Math.max(2, tok.t.length) + 'ch';
+    if(shown) return `<button class="gap shown ${tok.conn?'conngap':''}" style="min-width:${width}">${esc(tok.t)}</button>`;
+    if(level===4) return `<button class="gap hint" data-reveal="${key}" title="Tap to reveal">${esc(tok.t[0])}${'_'.repeat(Math.max(1,tok.t.length-1))}</button>`;
+    return `<button class="gap ${tok.conn?'conngap':''}" data-reveal="${key}" style="width:${width}" aria-label="Hidden word, tap to reveal">${esc(tok.t)}</button>`;
+  }).join('');
+}
+function stars(n){ return `<span class="stars" aria-label="${n} of 5 levels">${[1,2,3,4,5].map(i => i<=n?'★':'<span class="off">★</span>').join('')}</span>`; }
+function textView(){
+  if(!TS.open){
+    return `<h2>Textos</h2>
+      <p class="muted">Short texts to learn by heart, written in everyday Madrid Spanish. Connectors are highlighted, because those are the words that make you sound fluent. Work up one level at a time until you can say the whole text from the English.</p>
+      <div class="tlist">${TEXTS.map(t => `<button data-open="${t.id}"><span><span class="tt">${esc(t.title)}</span><br><span class="small muted">${esc(t.en)}</span></span>${stars(P.texts[t.id]||0)}</button>`).join('')}</div>`;
+  }
+  const T = TEXTS.find(t => t.id===TS.open), lvl = TS.level, best = P.texts[T.id]||0;
+  return `<button class="btn ghost" data-act="tback" style="padding-left:0">← All texts</button>
+    <h2>${esc(T.title)}</h2>
+    <p class="muted" style="margin-bottom:6px">${esc(T.en)}</p>
+    <p class="small">${esc(T.focus)}</p>
+    ${T.personal ? `<div class="personal">
+        <div><label class="sm" for="pname">Your name</label><input id="pname" value="${esc(P.settings.name||'')}" placeholder="tu nombre"></div>
+        <div><label class="sm" for="pcountry">Your country, in Spanish</label><input id="pcountry" value="${esc(P.settings.country||'')}" placeholder="p. ej. Alemania"></div>
+      </div>` : ''}
+    <div class="levels" role="group" aria-label="Level">${LEVELS.map((l,i) => `<button data-level="${i}" aria-pressed="${i===lvl}" class="${i>0 && i<=best?'done':''}">${l}</button>`).join('')}</div>
+    <div class="row" style="margin-bottom:6px">
+      <button class="btn" data-act="playall">🔊 Listen to all</button>
+      ${lvl>=2 && lvl<=3 ? `<button class="btn" data-act="reshuffle">New gaps</button>` : ''}
+      ${lvl>=1 && lvl<=4 ? `<button class="btn ghost" data-act="revealall">Reveal all</button>` : ''}
+    </div>
+    <p class="small muted">${[
+      'Read it aloud a few times. Tap EN to see the translation of a line.',
+      'The connectors are gone. Say each line with the right connector, then tap the gap to check.',
+      'Some words are hidden. Say the full line before you tap to check.',
+      'Most words are hidden now. Lean on the rhythm of the sentence.',
+      'Only first letters are left. This is almost reciting.',
+      'Say each line in Spanish from the English, then tap to check.'][lvl]}</p>
+    <div class="panel" style="padding:4px 14px">
+      ${T.lines.map(([who, es, en], i) => `
+        <div class="line">
+          <div class="body">
+            ${who ? `<div class="who">${esc(who)}</div>` : ''}
+            ${lvl===5 ? `<div class="en" style="font-size:1.05rem;color:var(--ink)">${esc(fill(en))}</div>
+                ${TS.revealed[T.id+'-r'+i] ? `<div class="es">${renderSentence(T.id,i,es,0)}</div>` : `<button class="recite" data-reveal="${T.id}-r${i}">Say it, then tap to check</button>`}`
+              : `<div class="es">${renderSentence(T.id,i,es,lvl)}</div>
+                ${TS.showEn[i] ? `<div class="en">${esc(fill(en))}</div>` : `<button class="tbtn" data-en="${i}">EN</button>`}`}
+          </div>
+          ${speakBtn(es,'sm')}
+        </div>`).join('')}
+    </div>
+    <div class="center">
+      ${lvl<5 ? `<button class="btn primary" data-act="levelup">I can do this, next level</button>` : `<button class="btn primary" data-act="levelup">I can recite it ★</button>`}
+    </div>`;
+}
+
+// ===== EVENTS =====
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const d = b.dataset;
+  if(d.go) return go(d.go);
+  if(d.say !== undefined) return speak(d.say);
+  if(d.ins){ const inp = $('#vin') || $('#typein') || $('#chatin'); if(inp && !inp.readOnly){ const s=inp.selectionStart??inp.value.length, en=inp.selectionEnd??s; inp.value = inp.value.slice(0,s)+d.ins+inp.value.slice(en); inp.focus(); inp.setSelectionRange(s+1,s+1); if(inp.id==='chatin') AI.draft = inp.value;} return; }
+  // decks
+  const deck = (current==='words'||current==='phrases') ? current : null;
+  if(deck){
+    const st = deckSettings(deck);
+    if(d.deckmode){ st.mode = d.deckmode; save(); return render(); }
+    if(d.dir){ st.dir = d.dir; save(); buildSession(deck); return render(); }
+    if(d.cat){ const c = d.cat; st.cats = st.cats.includes(c) ? st.cats.filter(x=>x!==c) : [...st.cats, c]; save(); buildSession(deck); return render(); }
+    if(d.act==='flip'){ const ti = $('#typein'); deckState[deck].typed = ti ? ti.value : ''; deckState[deck].flipped = true; return render(); }
+    if(d.grade) return grade(deck, d.grade);
+    if(d.act==='newround'){ buildSession(deck); return render(); }
+  }
+  // verbs
+  if(current==='verbs'){
+    const st = verbSettings();
+    if(d.vmode){ st.mode = d.vmode; save(); return render(); }
+    if(d.tense){ st.tenses = st.tenses.includes(d.tense) ? st.tenses.filter(x=>x!==d.tense) : [...st.tenses, d.tense]; save(); VS.q=null; return render(); }
+    if(d.vset){ st.set = d.vset; save(); VS.q=null; VS.retry=[]; return render(); }
+    if(d.act==='vcheck') return checkVerb(false);
+    if(d.act==='vskip') return checkVerb(true);
+    if(d.act==='vnext'){ nextVerbQ(); return render(); }
+  }
+  // texts
+  if(current==='texts'){
+    if(d.open){ TS.open = d.open; TS.level = 0; TS.revealed = {}; TS.showEn = {}; TS.seed = 0; render(); return window.scrollTo(0,0); }
+    if(d.act==='tback'){ TS.open = null; speechSynthesis && speechSynthesis.cancel(); return render(); }
+    if(d.level){ TS.level = +d.level; TS.revealed = {}; TS.showEn = {}; return render(); }
+    if(d.reveal){ TS.revealed[d.reveal] = true; return render(); }
+    if(d.en){ TS.showEn[d.en] = true; return render(); }
+    if(d.act==='reshuffle'){ TS.seed++; TS.revealed = {}; return render(); }
+    if(d.act==='revealall'){ document.querySelectorAll('[data-reveal]').forEach(x => TS.revealed[x.dataset.reveal]=true); return render(); }
+    if(d.act==='playall'){ const T = TEXTS.find(t=>t.id===TS.open); return speak(T.lines.map(l=>l[1]).join(' ')); }
+    if(d.act==='levelup'){
+      const T = TEXTS.find(t=>t.id===TS.open);
+      const done = TS.level===0 ? 0 : TS.level;
+      if(TS.level>0) P.texts[T.id] = Math.max(P.texts[T.id]||0, done);
+      save();
+      if(TS.level<5){ TS.level++; TS.revealed={}; TS.showEn={}; render(); return window.scrollTo(0,0); }
+      TS.open = null; return render();
+    }
+  }
+  if(d.act==='reset'){
+    if(confirm('Reset all progress? Your cards, verb stats, text levels, saved mistakes and conversation will be cleared.')){ P = {cards:{}, verbs:{}, texts:{}, settings:{ai:{ model: MODELS[0].id, scenario:'free', autoSpeak:false, useWords:true }}}; CHAT = []; refreshCustom(); save(); deckState.words = deckState.phrases = null; VS.q=null; render(); }
+  }
+});
+document.addEventListener('input', e => {
+  if(e.target.id==='rate'){ P.settings.rate = +e.target.value; save(); }
+  if(e.target.id==='pname'){ P.settings.name = e.target.value.trim(); save(); }
+  if(e.target.id==='pcountry'){ P.settings.country = e.target.value.trim(); save(); }
+});
+document.addEventListener('change', e => {
+  if(e.target.id==='vpick'){ VS.tableVerb = e.target.value; render(); }
+  if(e.target.id==='pname' || e.target.id==='pcountry') render();
+});
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName||'').toLowerCase();
+  if(current==='verbs' && verbSettings().mode==='drill' && e.key==='Enter'){
+    e.preventDefault();
+    if(VS.answered){ nextVerbQ(); render(); } else checkVerb(false);
+    return;
+  }
+  if(current==='words' || current==='phrases'){
+    const S = deckState[current]; if(!S || !S.q.length) return;
+    if(e.target.id==='typein' && e.key==='Enter'){ e.preventDefault(); S.typed = e.target.value; S.flipped = true; return render(); }
+    if(tag==='input') return;
+    if(!S.flipped && (e.key===' ' || e.key==='Enter')){ e.preventDefault(); S.flipped = true; return render(); }
+    if(S.flipped && ['1','2','3'].includes(e.key)) return grade(current, ['again','almost','good'][+e.key-1]);
+  }
+});
+
+
+// ===== CONVERSATION (WebLLM: the model runs inside this page, on your device) =====
+const MODELS = [
+  {id:'gemma3-1b-it-q4f16_1-MLC', name:'Gemma 3 · 1B', mem:'about 0.7 GB of memory', note:'Lightest. Start with this one on the iPhone.'},
+  {id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name:'Qwen 2.5 · 1.5B', mem:'about 1.6 GB of memory', note:'Better Spanish. Try it on the iPhone once the light one works.'},
+  {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', name:'Qwen 2.5 · 3B', mem:'about 2.5 GB of memory', note:'The best conversations. Meant for the M1 iPad.'}
+];
+const SCENARIOS = [
+  {id:'free', title:'Charla libre', role:'Lucía, a friendly 30-year-old woman from Madrid', setting:'You have just met the learner at a terrace bar in La Latina. Chat about anything: their trip, food, Madrid, plans.', goal:'Keep the conversation going for ten exchanges.'},
+  {id:'t1', title:'Me presento', role:'Lucía, a friendly 30-year-old woman from Madrid', setting:'You meet the learner in the common room of a hostel. Ask who they are, where they are from, why they are learning Spanish.', goal:'Introduce yourself using the text you learned.'},
+  {id:'t2', title:'Mi primer día en Madrid', role:'Lucía, the learner’s Spanish friend', setting:'It is evening. Ask the learner what they have done today in Madrid. Use the pretérito perfecto (¿Qué has hecho hoy?).', goal:'Tell her about your day with “he + participle”.'},
+  {id:'t3', title:'En el bar', role:'a busy but friendly waiter in a tapas bar in Madrid', setting:'The learner sits at the bar. Take their drink order, recommend tapas, and later tell them how much it is.', goal:'Order a drink and a tapa, then ask for the bill.'},
+  {id:'t4', title:'Perdido en Sol', role:'a kind older woman from Madrid standing at Puerta del Sol', setting:'The learner is lost and asks for directions. Give simple directions, mention metro lines or walking.', goal:'Find out how to get to a place, and whether it is far.'},
+  {id:'t5', title:'Mis fines de semana', role:'Lucía, a new friend from Madrid', setting:'Ask the learner what they usually do at weekends and tell them about yours. Use soler, normalmente, a veces.', goal:'Describe your habits with soler and connectors.'},
+  {id:'t6', title:'¿Ciudad o pueblo?', role:'Lucía, a friend who loves a good debate', setting:'Discuss whether it is better to live in a big city or a small village. Disagree a little to make the learner argue.', goal:'Give your opinion with por un lado, por otro, sin embargo.'},
+  {id:'t7', title:'Un problema en el piso', role:'Señor Martín, the owner of the holiday flat the learner is renting (speak formally, with usted)', setting:'The learner phones you about a problem in the flat. Ask what is wrong and arrange a solution.', goal:'Explain a problem politely and agree on a time.'},
+  {id:'t8', title:'Una anécdota', role:'Lucía, a curious friend', setting:'Ask the learner to tell you a funny or strange thing that happened to them on a trip. React with interest and ask follow-up questions.', goal:'Tell a story with the imperfecto and the indefinido.'},
+  {id:'t9', title:'Planes para mañana', role:'Lucía, a friend from Madrid', setting:'Make plans together for tomorrow (Sunday): the Rastro market, lunch in La Latina, a time and place to meet.', goal:'Agree on a plan, a time and a meeting point.'}
+];
+const AI = { webllm:null, engine:null, status:'idle', progress:0, progText:'', error:'', gpu:null, cached:{}, loadedId:null, generating:false, draft:'', showSetup:false };
+if(!P.settings.ai) P.settings.ai = { model: MODELS[0].id, scenario:'free', autoSpeak:false, useWords:true };
+let CHAT = (P.chat && Array.isArray(P.chat.msgs)) ? P.chat.msgs : [];
+const saveNow = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch(e){} };
+const saveChat = () => { P.chat = { msgs: CHAT }; save(); };
+
+// Detect a crash during the last load (iOS reloads the page when it runs out of memory)
+const crashedWhileLoading = P.settings.aiLoading || null;
+if(crashedWhileLoading){ delete P.settings.aiLoading; saveNow(); }
+
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+
+async function checkEnvironment(){
+  if(AI.gpu !== null) return;
+  AI.gpu = 'checking';
+  try {
+    if(!navigator.gpu) AI.gpu = 'none';
+    else { const a = await navigator.gpu.requestAdapter(); AI.gpu = a ? 'ok' : 'noadapter'; }
+  } catch(e){ AI.gpu = 'none'; }
+  if(location.protocol.startsWith('http')){
+    try { AI.webllm = AI.webllm || await import('./webllm.js'); } catch(e){ AI.libError = String(e && e.message || e); }
+    if(AI.webllm){ for(const m of MODELS){ try { AI.cached[m.id] = await AI.webllm.hasModelInCache(m.id); } catch(e){} } }
+  }
+  if(current==='talk') render();
+}
+
+async function loadModel(id){
+  if(AI.status==='loading') return;
+  AI.status = 'loading'; AI.error = ''; AI.progress = 0; AI.progText = 'Starting…';
+  P.settings.ai.model = id; P.settings.aiLoading = id; saveNow();
+  render();
+  try {
+    if(navigator.storage && navigator.storage.persist) { try { await navigator.storage.persist(); } catch(e){} }
+    AI.webllm = AI.webllm || await import('./webllm.js');
+    const cb = r => { AI.progress = r.progress || 0; AI.progText = r.text || ''; updateProgress(); };
+    if(AI.engine){ AI.engine.setInitProgressCallback(cb); await AI.engine.reload(id); }
+    else AI.engine = await AI.webllm.CreateMLCEngine(id, { initProgressCallback: cb });
+    AI.loadedId = id; AI.status = 'ready'; AI.cached[id] = true; AI.showSetup = false;
+  } catch(e){
+    AI.status = 'error';
+    AI.error = String(e && e.message || e);
+  }
+  delete P.settings.aiLoading; saveNow();
+  render();
+}
+function updateProgress(){
+  const bar = $('#aiprog i'), txt = $('#aiprogtxt');
+  if(bar) bar.style.width = Math.round(AI.progress*100) + '%';
+  if(txt) txt.textContent = AI.progText;
+}
+async function deleteModel(id){
+  if(!confirm('Delete this downloaded model from the device? You will need wifi to download it again.')) return;
+  try { AI.webllm = AI.webllm || await import('./webllm.js'); await AI.webllm.deleteModelAllInfoInCache(id); AI.cached[id] = false; } catch(e){ alert('Could not delete: ' + (e.message||e)); }
+  render();
+}
+
+// ----- prompts -----
+function difficultWords(){
+  const out = new Set();
+  for(const [k, r] of Object.entries(P.cards)){
+    if(r.b <= 1 && k.startsWith('w:')) out.add(k.slice(2).split('|')[0]);
+  }
+  return shuffle([...out]).slice(0, 8);
+}
+function instructions(){
+  const s = SCENARIOS.find(x => x.id===P.settings.ai.scenario) || SCENARIOS[0];
+  const words = P.settings.ai.useWords ? difficultWords() : [];
+  return `Let's do a role-play so I can practise speaking Spanish. I am a learner at B1 level.
+You are ${s.role}, in Madrid, Spain.
+Situation: ${s.setting}
+Rules:
+1. Always answer in Spanish from Spain: use "vosotros", words like "vale", "coger", "móvil", and the pretérito perfecto for things that happened today.
+2. Keep each reply short: one to three simple sentences.
+3. End every reply with a question so the conversation continues.
+4. If my last message had a grammar or vocabulary mistake, add a final line that starts with "Corrección:" followed by my corrected sentence. If there was no mistake, do not write that line.
+5. Never write in English. Stay in character.${words.length ? `\n6. When it fits naturally, use some of these words I am learning: ${words.join(', ')}.` : ''}
+
+Start now: say your first line to me, in character, in Spanish.`;
+}
+const REMINDER = '\n\n(Recuerda: responde en español de España, una a tres frases cortas, y termina con una pregunta. Si mi mensaje tiene un error, añade al final una línea "Corrección:" con mi frase corregida.)';
+function payload(){
+  let msgs = CHAT.filter(m => !m.error).map(m => ({role:m.role, content:m.content}));
+  if(msgs.length > 13) msgs = [msgs[0], ...msgs.slice(-12)];
+  const last = msgs[msgs.length-1];
+  if(last && last.role==='user' && msgs.length > 1) msgs[msgs.length-1] = {role:'user', content:last.content + REMINDER};
+  return msgs;
+}
+function parseReply(txt, lastUser){
+  const t = txt.replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+  const parts = t.split(/\n?[ \t]*[*_]*[ \t]*Correcci[oó]n[ \t]*[*_]*[ \t]*:[ \t]*/i);
+  let reply = parts[0].trim();
+  let corr = parts.slice(1).join(' ').replace(/[*_]/g,'').split('\n')[0].trim();
+  if(corr && (/^(ninguna|no hay|nada|none|n\/a|-)/i.test(corr) || (lastUser && strip(norm(corr))===strip(norm(lastUser))))) corr = '';
+  if(!reply && corr){ reply = corr; corr = ''; }
+  return {reply, corr};
+}
+
+// ----- generation -----
+async function generate(){
+  if(!AI.engine || AI.generating) return;
+  AI.generating = true;
+  const lastUser = [...CHAT].reverse().find(m => m.role==='user' && !m.hidden);
+  const messages = payload();
+  CHAT.push({role:'assistant', content:'', show:''});
+  const idx = CHAT.length - 1;
+  renderTalkMessages();
+  let txt = '';
+  try {
+    const chunks = await AI.engine.chat.completions.create({ messages, stream:true, temperature:0.7, max_tokens:220 });
+    for await (const ch of chunks){
+      txt += (ch.choices[0] && ch.choices[0].delta && ch.choices[0].delta.content) || '';
+      const el = document.querySelector(`#msg-${idx} .txt`);
+      if(el){ el.textContent = parseReply(txt).reply || '…'; scrollChat(); }
+    }
+    let {reply, corr} = parseReply(txt, lastUser && lastUser.show);
+    if(!lastUser) corr = '';
+    CHAT[idx] = {role:'assistant', content: txt.replace(/<think>[\s\S]*?<\/think>/g,'').trim() || reply, show: reply, corr};
+    if(P.settings.ai.autoSpeak) speak(reply);
+  } catch(e){
+    CHAT[idx] = {role:'assistant', content:'', show:'The model stopped with an error: ' + (e.message||e), error:true};
+  }
+  AI.generating = false;
+  saveChat();
+  render();
+}
+async function oneShot(prompt, maxTokens=160){
+  const r = await AI.engine.chat.completions.create({ messages:[{role:'user', content:prompt}], temperature:0.2, max_tokens:maxTokens });
+  return ((r.choices[0] && r.choices[0].message && r.choices[0].message.content) || '').replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+}
+async function translateMsg(i){
+  if(AI.generating) return;
+  AI.generating = true; CHAT[i].en = '…'; render();
+  try { CHAT[i].en = await oneShot(`Translate this Spanish text into English. Reply with only the English translation.\n\n${CHAT[i].show}`); }
+  catch(e){ CHAT[i].en = 'Translation failed.'; }
+  AI.generating = false; saveChat(); render();
+}
+async function suggestReply(){
+  if(AI.generating) return;
+  const s = SCENARIOS.find(x => x.id===P.settings.ai.scenario) || SCENARIOS[0];
+  const convo = CHAT.filter(m => !m.hidden && !m.error).slice(-6).map(m => (m.role==='user'?'Learner: ':'Other person: ') + m.show).join('\n');
+  AI.generating = true; render();
+  try {
+    let sug = await oneShot(`A Spanish learner (B1) is in this role-play situation in Madrid: ${s.setting}\nConversation so far:\n${convo}\n\nWrite one short, natural reply in Spanish from Spain that the learner could say next. Reply with only that sentence, nothing else.`, 80);
+    sug = sug.replace(/^(Learner|Aprendiz|Tú)\s*:\s*/i,'').replace(/^["«“]|["»”]$/g,'').split('\n')[0];
+    AI.draft = sug;
+  } catch(e){}
+  AI.generating = false; render();
+}
+function startConversation(){
+  if(AI.generating) return;
+  CHAT = [{role:'user', content: instructions(), show:'', hidden:true}];
+  saveChat(); render(); generate();
+}
+function sendMessage(){
+  const ta = $('#chatin'); const text = (ta ? ta.value : AI.draft).trim();
+  if(!text || AI.generating) return;
+  if(!CHAT.length) { CHAT = [{role:'user', content: instructions(), show:'', hidden:true}]; }
+  CHAT.push({role:'user', content:text, show:text});
+  AI.draft = '';
+  saveChat(); generate();
+}
+function saveMistake(i){
+  const m = CHAT[i]; if(!m || !m.corr) return;
+  const said = [...CHAT.slice(0,i)].reverse().find(x => x.role==='user' && !x.hidden);
+  if(!P.custom) P.custom = [];
+  const id = 'p:' + m.corr;
+  if(!P.custom.some(c => c.id===id)) P.custom.push({id, es:m.corr, en:'You said: ' + (said ? said.show : '…'), note:'From a conversation. Say the corrected sentence.', cat:'My mistakes'});
+  m.saved = true;
+  refreshCustom();
+  const st = deckSettings('phrases'); if(!st.cats.includes('My mistakes')) st.cats.push('My mistakes');
+  deckState.phrases = null;
+  saveChat(); render();
+}
+function refreshCustom(){
+  if(P.custom && P.custom.length) DECKS.phrases['My mistakes'] = P.custom.map(c => Object.assign({}, c, {cat:'My mistakes'}));
+  else delete DECKS.phrases['My mistakes'];
+}
+refreshCustom();
+function scrollChat(){ const box = $('#chatbox'); if(box) box.scrollTop = box.scrollHeight; }
+
+// ----- views -----
+function talkView(){
+  checkEnvironment();
+  if(AI.status!=='ready' || AI.showSetup) return setupView();
+  return chatView();
+}
+function setupView(){
+  const gpuMsg = {
+    checking:'Checking whether this browser can run AI models…',
+    ok:'✓ This browser can run AI models (WebGPU is available).',
+    none:'✗ This browser can’t run AI models: WebGPU isn’t available. On iPhone and iPad you need iOS / iPadOS 26 or later.',
+    noadapter:'✗ WebGPU exists but the browser didn’t give access to the graphics chip. Try restarting the browser.'
+  }[AI.gpu] || '';
+  const local = !location.protocol.startsWith('http');
+  const sel = P.settings.ai.model;
+  return `<h2>Hablar</h2>
+  <p class="muted">Role-play conversations with an AI that runs entirely on this device, with no internet once it’s downloaded. It plays a character from the situations in Textos, keeps replies short, and corrects your mistakes.</p>
+  ${AI.status==='ready' ? `<div class="row" style="margin-bottom:10px"><button class="btn" data-ai="backchat">← Back to the conversation</button></div>` : ''}
+  <div class="panel">
+    <h3 style="margin-top:0">Device check</h3>
+    <p class="${AI.gpu==='ok'?'okline':(AI.gpu==='checking'?'':'badline')}">${gpuMsg}</p>
+    ${local ? `<p class="badline">✗ This page was opened as a local file. The AI part only works when the page is opened from a web address (see the setup steps that came with this file). Everything else still works.</p>` : ''}
+    ${isIOS && !isStandalone && !local ? `<p class="warnline">Open this page from its Home Screen icon before downloading a model. The Home Screen app keeps its own storage, so a model downloaded in a Safari tab won’t be there.</p>` : ''}
+    ${AI.libError ? `<p class="badline">The AI library didn’t load: ${esc(AI.libError)}</p>` : ''}
+  </div>
+  ${crashedWhileLoading ? `<div class="panel warnpanel"><b>Last time, the page restarted while loading ${esc((MODELS.find(m=>m.id===crashedWhileLoading)||{}).name||'a model')}.</b> That usually means the device ran out of memory. Try a smaller model and close other apps first.</div>` : ''}
+  <div class="panel">
+    <h3 style="margin-top:0">Choose a model</h3>
+    ${MODELS.map(m => `<label class="mrow">
+        <input type="radio" name="model" value="${m.id}" ${m.id===sel?'checked':''}>
+        <span><b>${m.name}</b> <span class="small muted">${m.mem}${AI.cached[m.id]?' · downloaded':''}</span><br><span class="small">${m.note}</span></span>
+        ${AI.cached[m.id] ? `<button class="btn ghost small" data-ai="delete" data-id="${m.id}">Delete</button>` : ''}
+      </label>`).join('')}
+    <p class="small muted" style="margin-top:10px">The first time, the model downloads once (use wifi). After that it loads from the device, even in airplane mode. Loading takes a little while each time you open the app.</p>
+    ${AI.status==='loading' ? `<div id="aiprog" class="bar" style="margin:10px 0"><i style="width:${Math.round(AI.progress*100)}%"></i></div><p id="aiprogtxt" class="small muted">${esc(AI.progText)}</p>`
+      : `<button class="btn primary" data-ai="load" ${AI.gpu!=='ok'||local?'disabled':''}>${AI.cached[sel] ? 'Load model' : 'Download and load model'}</button>`}
+    ${AI.status==='error' ? `<p class="badline" style="margin-top:10px">Loading failed: ${esc(AI.error)}</p><p class="small">If this mentions memory or the device, try a smaller model. If it mentions the network, connect to wifi and try again.</p>` : ''}
+  </div>`;
+}
+function chatView(){
+  const s = P.settings.ai;
+  const scn = SCENARIOS.find(x => x.id===s.scenario) || SCENARIOS[0];
+  const visible = CHAT.map((m,i) => [m,i]).filter(([m]) => !m.hidden);
+  return `<h2>Hablar</h2>
+  <div class="row small muted" style="justify-content:space-between;margin-bottom:10px">
+    <span>Model: ${esc((MODELS.find(m=>m.id===AI.loadedId)||{}).name||'')}</span>
+    <button class="btn ghost small" data-ai="setup">Change model</button>
+  </div>
+  <div class="panel">
+    <label class="sm" for="scn">Situation</label>
+    <select id="scn" class="fieldi">${SCENARIOS.map(x => `<option value="${x.id}" ${x.id===s.scenario?'selected':''}>${esc(x.title)}</option>`).join('')}</select>
+    <p class="small" style="margin:8px 0">Your goal: ${esc(scn.goal)}</p>
+    <div class="row">
+      <button class="btn primary" data-ai="start" ${AI.generating?'disabled':''}>${CHAT.length ? 'Start a new conversation' : 'Start the conversation'}</button>
+      <label class="small"><input type="checkbox" id="autospeak" ${s.autoSpeak?'checked':''}> Read replies aloud</label>
+      <label class="small"><input type="checkbox" id="usewords" ${s.useWords?'checked':''}> Use words I’m struggling with</label>
+    </div>
+  </div>
+  <div id="chatbox" class="chatbox">${renderMsgs(visible)}</div>
+  <div class="composer">
+    <textarea id="chatin" rows="2" placeholder="Escribe en español… (you can dictate with the microphone on your keyboard)" autocapitalize="sentences">${esc(AI.draft)}</textarea>
+    ${accentBar(true)}
+    <div class="row" style="justify-content:space-between">
+      <button class="btn ghost" data-ai="suggest" ${AI.generating||!CHAT.length?'disabled':''}>Help me answer</button>
+      ${AI.generating ? `<button class="btn" data-ai="stop">Stop</button>` : `<button class="btn primary" data-ai="send">Send</button>`}
+    </div>
+  </div>
+  <p class="small muted">A small model’s Spanish isn’t perfect, and its corrections can be wrong. When it disagrees with Frases or Textos, trust those.</p>`;
+}
+function renderMsgs(visible){
+  if(!visible.length) return `<div class="empty small muted">Pick a situation and start the conversation. The other person speaks first.</div>`;
+  return visible.map(([m,i]) => m.role==='user'
+    ? `<div class="msg me" id="msg-${i}"><div class="txt">${esc(m.show)}</div></div>`
+    : `<div class="msg ai ${m.error?'err':''}" id="msg-${i}">
+        <div class="txt">${esc(m.show || '…')}</div>
+        ${m.corr ? `<div class="corr"><b>Corrección:</b> ${esc(m.corr)} ${m.saved ? '<span class="small okline">saved to Frases › My mistakes</span>' : `<button class="tbtn" data-ai="save" data-i="${i}">Save as a card</button>`}</div>` : ''}
+        ${m.en ? `<div class="en">${esc(m.en)}</div>` : ''}
+        ${m.show && !m.error ? `<div class="row" style="gap:4px;margin-top:4px">${speakBtn(m.show,'sm')}${m.en?'':`<button class="tbtn" data-ai="translate" data-i="${i}" ${AI.generating?'disabled':''}>EN</button>`}</div>` : ''}
+      </div>`).join('');
+}
+function renderTalkMessages(){
+  const box = $('#chatbox'); if(!box) return render();
+  box.innerHTML = renderMsgs(CHAT.map((m,i)=>[m,i]).filter(([m]) => !m.hidden));
+  scrollChat();
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-ai]'); if(!b || current!=='talk') return;
+  const a = b.dataset.ai;
+  if(a==='load'){ const r = document.querySelector('input[name="model"]:checked'); return loadModel(r ? r.value : MODELS[0].id); }
+  if(a==='delete'){ e.preventDefault(); return deleteModel(b.dataset.id); }
+  if(a==='setup'){ AI.showSetup = true; return render(); }
+  if(a==='backchat'){ AI.showSetup = false; return render(); }
+  if(a==='start') return startConversation();
+  if(a==='send') return sendMessage();
+  if(a==='stop'){ try { AI.engine.interruptGenerate(); } catch(err){} return; }
+  if(a==='suggest') return suggestReply();
+  if(a==='translate') return translateMsg(+b.dataset.i);
+  if(a==='save') return saveMistake(+b.dataset.i);
+});
+document.addEventListener('change', e => {
+  if(current!=='talk') return;
+  if(e.target.name==='model'){ P.settings.ai.model = e.target.value; save(); render(); }
+  if(e.target.id==='scn'){ P.settings.ai.scenario = e.target.value; save(); render(); }
+  if(e.target.id==='autospeak'){ P.settings.ai.autoSpeak = e.target.checked; save(); }
+  if(e.target.id==='usewords'){ P.settings.ai.useWords = e.target.checked; save(); }
+});
+document.addEventListener('input', e => { if(e.target.id==='chatin') AI.draft = e.target.value; });
+document.addEventListener('keydown', e => {
+  if(current==='talk' && e.target.id==='chatin' && e.key==='Enter' && !e.shiftKey && !isIOS){ e.preventDefault(); sendMessage(); }
+});
+
+render();
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>
